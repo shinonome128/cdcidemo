@@ -392,6 +392,7 @@ SE Linux が邪魔するらしい・・・
 ```  
 sudo setenforce 0  
 ```  
+```  
 [shinonome128@instance-2 devops-example-server]$ curl http://localhost/example.php  
 {"date":"2018-09-19T09:57:07+00:00"}[shinonome128@instance-2 devops-example-server]$  
 ```  

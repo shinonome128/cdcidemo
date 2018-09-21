@@ -454,6 +454,12 @@ echo # gcp_firewall.tf >> gcp_firewall.tf
 echo # gcp_instances.tf >> gcp_instances.tf
 ```
 
+コミットとプッシュ
+強制プッシュ
+```
+git push -f
+```
+
 ## サーバ側のデプロイの自動化  
 
 以上  

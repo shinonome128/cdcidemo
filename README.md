@@ -43,7 +43,13 @@ https://forums.docker.com/t/failure-to-start-docker-on-an-amazon-linux-machine/4
   
 docker が php 叩けない、selnux が邪魔するケース  
 https://devops.stackexchange.com/questions/3083/apache-container-cant-access-php-files-mounted-in-var-www-403-error  
-  
+
+GCP、Terraform 連携
+https://gist.github.com/MisaKondo/cb46b0ecd106e9c824a641b14954b8e1
+
+Trraform本家、インストレーションガイド
+https://www.terraform.io/intro/getting-started/install.html
+
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -413,8 +419,41 @@ git remote add origin https://github.com/shinonome128/cdcidemo.git
 git push -u origin master  
 ```  
   
+## Terraformインスト
+
+Terraform をローカルにダウンロード
+zip なので回答して配置
+パスを通しておく
+Woxからコマンドプロンプトを呼び出す場合は、Evrything / Wox を再起動する
+```
+C:\Users\shino\bin\terraform_0.11.8_windows_amd64\
+```
+
+起動確認
+```
+terraform --version
+```
+OK
+
+## Trrraform gcp セットアップ
+
+GCPコンソールからAPIとサービスを選択
+対象プｒジェクトを選択
+Compute Engine API を検索して有効化する
+
+terraform 設定フォルダ作成
+```
+mkdir terraform
+```
+
+terraform 設定ファイルの作成
+```
+echo # gcp_provider.tf >> gcp_provider.tf
+echo # gcp_network.tf >> gcp_network.tf
+echo # gcp_firewall.tf >> gcp_firewall.tf
+echo # gcp_instances.tf >> gcp_instances.tf
+```
+
 ## サーバ側のデプロイの自動化  
-  
-ここから再開  
-  
+
 以上  

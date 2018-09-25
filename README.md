@@ -49,7 +49,10 @@ https://gist.github.com/MisaKondo/cb46b0ecd106e9c824a641b14954b8e1
   
 Trraform本家、インストレーションガイド  
 https://www.terraform.io/intro/getting-started/install.html  
-  
+
+GCP サービスアカント、クレデンシャルファイル作成方法
+https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/
+
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -482,16 +485,13 @@ cicd-demo-707b32bf1a7f.json
 
 .gitignore にクレデンシャルを追加
 ```
-cicd-demo-.*json
+.*json
 ```
 
-
-クレデンシャルフォルダを作成しファイルを移動
-
-
-
-キーを移動
-move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo\terraform
+クレデンシャルキーを移動
+```
+move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo
+```
 
 
 

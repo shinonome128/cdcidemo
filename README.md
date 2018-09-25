@@ -491,6 +491,41 @@ cicd-demo-707b32bf1a7f.json
 move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo  
 ```  
   
+## gcp_provider.tf 作成  
+  
+クレデンシャルファイル  
+```  
+cicd-demo-707b32bf1a7f.json  
+```  
+  
+プロジェクト  
+```  
+cicd-demo  
+```  
+  
+リージョン  
+```  
+us-east1  
+```  
+  
+下記を書き換える  
+```  
+# gcp_provider.tf  
+// Configure the Google Cloud provider  
+provider "google" {  
+  credentials = "${file("#{service_account_json_file}")}"  
+  project     = "mass-gcp-2016-advent-calendar"  
+  region      = "asia-northeast1"  
+}  
+```  
+完了  
+  
+## gcp_network.tf 作成  
+  
+## gcp_firewall.tf 作成  
+  
+## gcp_instances.tf 作成  
+  
 ## サーバ側のデプロイの自動化  
   
 以上  

@@ -49,10 +49,10 @@ https://gist.github.com/MisaKondo/cb46b0ecd106e9c824a641b14954b8e1
   
 Trraform本家、インストレーションガイド  
 https://www.terraform.io/intro/getting-started/install.html  
-
-GCP サービスアカント、クレデンシャルファイル作成方法
-https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/
-
+  
+GCP サービスアカント、クレデンシャルファイル作成方法  
+https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -273,7 +273,7 @@ sudo docker ps
 ```  
 ```  
 [shinonome128@instance-2 devops-example-server]$ sudo docker ps  
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS    
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS   
            NAMES  
 f868bf569a38        php:7.0-apache      "docker-php-entryp..."   6 minutes ago       Up 6 minutes        0.0.0.0:80->80/tcp   boring_lichterman  
 ```  
@@ -462,43 +462,35 @@ echo # gcp_instances.tf >> gcp_instances.tf
 ```  
 git push -f  
 ```  
-
-ここから再開、tf ファイルの中身から書き始める
-まずはサンプルから開始、そのあと、環境を最適化する
-その前にGCPのプロジェクトでクレデンシャルファイルの作成が必要そう
-
-## GCPでのクレデンシャルファイルの作成
-
-全部、GUIから作成
-GCP コンソール上からプロジェクト選択
-APIとサービス 選択
-認証情報を選択
-認証情報を作成 クリック
-サービスアカントキー クリック
-Compute Engine default service account を選択
-JSON をチェック
-作成をクリック
-クレデンシャルファイルがブラウザ経由でダウンロードされる
-```
-cicd-demo-707b32bf1a7f.json
-```
-
-.gitignore にクレデンシャルを追加
-```
-*.json
-```
-
-クレデンシャルキーを移動
-```
-move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo
-```
-
-```
-move cicd-demo-707b32bf1a7f.json ..\
-```
-
+  
+ここから再開、tf ファイルの中身から書き始める  
+まずはサンプルから開始、そのあと、環境を最適化する  
+その前にGCPのプロジェクトでクレデンシャルファイルの作成が必要そう  
+  
+## GCPでのクレデンシャルファイルの作成  
+  
+全部、GUIから作成  
+GCP コンソール上からプロジェクト選択  
+APIとサービス 選択  
+認証情報を選択  
+認証情報を作成 クリック  
+サービスアカントキー クリック  
+Compute Engine default service account を選択  
+JSON をチェック  
+作成をクリック  
+クレデンシャルファイルがブラウザ経由でダウンロードされる  
+```  
+cicd-demo-707b32bf1a7f.json  
+```  
+  
+.gitignore にクレデンシャルを追加  
+完了  
+  
+クレデンシャルキーを移動  
+```  
+move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo  
+```  
+  
 ## サーバ側のデプロイの自動化  
-
-
-
+  
 以上  

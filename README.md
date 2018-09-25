@@ -273,7 +273,7 @@ sudo docker ps
 ```  
 ```  
 [shinonome128@instance-2 devops-example-server]$ sudo docker ps  
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS   
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS  
            NAMES  
 f868bf569a38        php:7.0-apache      "docker-php-entryp..."   6 minutes ago       Up 6 minutes        0.0.0.0:80->80/tcp   boring_lichterman  
 ```  

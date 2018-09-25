@@ -485,7 +485,7 @@ cicd-demo-707b32bf1a7f.json
 
 .gitignore にクレデンシャルを追加
 ```
-.*json
+*.json
 ```
 
 クレデンシャルキーを移動
@@ -493,7 +493,9 @@ cicd-demo-707b32bf1a7f.json
 move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo
 ```
 
-
+```
+move cicd-demo-707b32bf1a7f.json ..\
+```
 
 ## サーバ側のデプロイの自動化  
 

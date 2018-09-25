@@ -435,7 +435,7 @@ terraform --version
 ```  
 OK  
   
-## Trrraform gcp セットアップ  
+## Terraform gcp セットアップ  
   
 GCPコンソールからAPIとサービスを選択  
 対象プｒジェクトを選択  
@@ -462,6 +462,38 @@ git push -f
 
 ここから再開、tf ファイルの中身から書き始める
 まずはサンプルから開始、そのあと、環境を最適化する
+その前にGCPのプロジェクトでクレデンシャルファイルの作成が必要そう
+
+## GCPでのクレデンシャルファイルの作成
+
+全部、GUIから作成
+GCP コンソール上からプロジェクト選択
+APIとサービス 選択
+認証情報を選択
+認証情報を作成 クリック
+サービスアカントキー クリック
+Compute Engine default service account を選択
+JSON をチェック
+作成をクリック
+クレデンシャルファイルがブラウザ経由でダウンロードされる
+```
+cicd-demo-707b32bf1a7f.json
+```
+
+.gitignore にクレデンシャルを追加
+```
+cicd-demo-.*json
+```
+
+
+クレデンシャルフォルダを作成しファイルを移動
+
+
+
+キーを移動
+move C:\Users\shino\Downloads\cicd-demo-707b32bf1a7f.json C:\Users\shino\doc\cdcidemo\terraform
+
+
 
 ## サーバ側のデプロイの自動化  
 

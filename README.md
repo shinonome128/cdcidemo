@@ -612,15 +612,12 @@ resource "google_compute_instance" "development" {
   
 ゾーンを書き換える  
 自分のGCPコンソールの所属するus-east1 で、ubuntu-os が使えるゾーンを指定するはず  
-ここから再開、途中でうたたねしてた。  
-  
-  
+GCPコンソールからインスタンス作成時にゾーン選択がありヘルプでゾーン名がわかる  
+cicdデモ用のインスタンス配置場所  
 ```  
-  zone         = "asia-northeast1-c"  
-  
-  zone         = "asia-northeast1-c"  
+us-east1-b  
 ```  
-  
+完了  
   
   
 ## サーバ側のデプロイの自動化  

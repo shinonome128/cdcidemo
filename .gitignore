@@ -1,3 +1,4 @@
 # cdcidemo
 *.swp
 *.json
+.terraform/

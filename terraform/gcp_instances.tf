@@ -7,8 +7,14 @@ resource "google_compute_instance" "development" {
   description  = "gcp-2016-advent-calendar"
   tags         = ["development", "mass"]
 
-  disk {
-    image = "ubuntu-os-cloud/ubuntu-1404-lts"
+#  disk {
+#    image = "ubuntu-os-cloud/ubuntu-1404-lts"
+#  }
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-1404-lts"
+    }
   }
 
   // Local SSD disk

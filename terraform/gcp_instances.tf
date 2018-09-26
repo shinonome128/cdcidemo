@@ -3,7 +3,7 @@
 resource "google_compute_instance" "development" {
   name         = "development"
   machine_type = "n1-standard-1"
-  zone         = "asia-northeast1-c"
+  zone         = "us-east1-b"
   description  = "gcp-2016-advent-calendar"
   tags         = ["development", "mass"]
 

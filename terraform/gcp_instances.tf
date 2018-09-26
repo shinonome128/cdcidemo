@@ -17,11 +17,14 @@ resource "google_compute_instance" "development" {
     }
   }
 
-  // Local SSD disk
-  disk {
-    type        = "local-ssd"
-    scratch     = true
-    auto_delete = true
+#  // Local SSD disk
+#  disk {
+#    type        = "local-ssd"
+#    scratch     = true
+#    auto_delete = true
+#  }
+
+  scratch_disk {
   }
 
   network_interface {

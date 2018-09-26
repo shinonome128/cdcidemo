@@ -922,6 +922,13 @@ can't guarantee that exactly these actions will be performed if
 C:\Users\shino\doc\cdcidemo>  
 ```  
   
+## Terraform プラグインの非管理  
+  
+.gitignore に追加  
+```  
+.terraform/  
+```  
+  
 ## Terraform でアプライ  
   
 ここから再開  

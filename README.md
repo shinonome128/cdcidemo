@@ -53,6 +53,8 @@ https://www.terraform.io/intro/getting-started/install.html
 GCP サービスアカント、クレデンシャルファイル作成方法  
 https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/  
   
+Terraform本家、GCPインスタンスのtfファイルのテンプレ  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -619,6 +621,310 @@ us-east1-b
 ```  
 完了  
   
+## Terraform でプラン  
+  
+tf ファイルを terraform ディレクトリに配置してチェック  
+```  
+terraform plan terraform  
+```  
+  
+今回は、terraform はパスを通してある、  
+サービスアカントは絶対パスで書いている  
+```  
+C:\Users\shino\doc\cdcidemo>dir /b /s terraform  
+C:\Users\shino\doc\cdcidemo\terraform\gcp_firewall.tf  
+C:\Users\shino\doc\cdcidemo\terraform\gcp_instances.tf  
+C:\Users\shino\doc\cdcidemo\terraform\gcp_network.tf  
+C:\Users\shino\doc\cdcidemo\terraform\gcp_provider.tf  
+```  
+  
+プラグイン足りないと怒られる  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+Plugin reinitialization required. Please run "terraform init".  
+Reason: Could not satisfy plugin requirements.  
+  
+Plugins are external binaries that Terraform uses to access and manipulate  
+resources. The configuration provided requires plugins which can't be located,  
+don't satisfy the version constraints, or are otherwise incompatible.  
+  
+1 error(s) occurred:  
+  
+* provider.google: no suitable version installed  
+  version requirements: "(any version)"  
+  versions installed: none  
+  
+Terraform automatically discovers provider requirements from your  
+configuration, including providers used in child modules. To see the  
+requirements and constraints from each module, run "terraform providers".  
+  
+  
+Error: error satisfying plugin requirements  
+```  
+  
+初期セットアップコマンドを実行  
+```  
+terraform init terraform  
+```  
+完了  
+terraform ディレクトリが作成されて、ここにプラグインが管理される  
+後で、これは管理しないので.gitignore に追加すること  
+  
+リトライ  
+```  
+terraform plan terraform  
+```  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+  
+Error: Error asking for user input: 1 error(s) occurred:  
+  
+* provider.google: file: open ../cicd-demo-707b32bf1a7f.json: The system cannot find the file specified. in:  
+  
+${file("../cicd-demo-707b32bf1a7f.json")}  
+```  
+サービスアカントのクレデンシャル読み取れないとエラーが出る  
+  
+方針  
+絶対パスにしてみる  
+パスをバックスラッシュにしてみる  
+tf と同じディレクトリに配置して、.gitignore に記載する  
+  
+絶対パスにしてみる  
+```  
+C:\Users\shino\doc\cdcidemo\cicd-demo-707b32bf1a7f.json  
+```  
+  
+リトライ  
+```  
+terraform plan terraform  
+```  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+  
+Error: Error parsing terraform\gcp_provider.tf: At 5:54: illegal char escape  
+```  
+5行目でエラー？  
+  
+パスをUNIX表記のスラッシュにしてみる  
+```  
+  credentials = "${file("C:/Users/shino/doc/cdcidemo/cicd-demo-707b32bf1a7f.json")}"  
+```  
+  
+リトライ  
+```  
+terraform plan terraform  
+```  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+  
+Error: google_compute_instance.development: "boot_disk": required field is not set  
+```  
+クレデンシャルファイル問題はクリア  
+今度はインスタンス設定ファイルでboot_disk 引数が無くて怒られている  
+  
+方針  
+参照元の設定ファイルでもboot_disk 引数が無いことを確認  
+tf ファイルのboot_disk 引数の意味を調査  
+  
+参照元の設定ファイルでもboot_disk 引数が無いことを確認  
+ないすね、terraform のテンプレが古いとおおわれる  
+GCPコンソールから確認すると、どうやら、OSのタイプと10Gの永続ディスクをしているっポイ  
+  
+tf ファイルのboot_disk 引数の意味を調査  
+terraform テンプレだと、boot_disk があるね、多分これが最新、せいかいなので、ここだけ変更する  
+```  
+resource "google_compute_instance" "default" {  
+  name         = "test"  
+  machine_type = "n1-standard-1"  
+  zone         = "us-central1-a"  
+  
+  tags = ["foo", "bar"]  
+  
+  boot_disk {  
+    initialize_params {  
+      image = "debian-cloud/debian-9"  
+    }  
+  }  
+  
+  // Local SSD disk  
+  scratch_disk {  
+  }  
+  
+  network_interface {  
+    network = "default"  
+  
+    access_config {  
+      // Ephemeral IP  
+    }  
+  }  
+  
+  metadata {  
+    foo = "bar"  
+  }  
+  
+  metadata_startup_script = "echo hi > /test.txt"  
+  
+  service_account {  
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]  
+  }  
+}  
+```  
+  
+リトライ  
+```  
+terraform plan terraform  
+```  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+  
+Error: google_compute_instance.development: "disk": [REMOVED] Use boot_disk, scratch_disk, and attached_disk instead  
+```  
+違うエラーがでた、ブートディスク指定したら、今度は、スクラッチディスク、アタッチディスクを使えと来た  
+  
+ディスク部分も書き換える  
+```  
+  // Local SSD disk  
+  scratch_disk {  
+  }  
+```  
+  
+リトライ  
+```  
+terraform plan terraform  
+```  
+  
+成功時の出力  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan terraform  
+Refreshing Terraform state in-memory prior to plan...  
+The refreshed state will be used to calculate this plan, but will not be  
+persisted to local or remote state storage.  
+  
+  
+------------------------------------------------------------------------  
+  
+An execution plan has been generated and is shown below.  
+Resource actions are indicated with the following symbols:  
+  + create  
+  
+Terraform will perform the following actions:  
+  
+  + google_compute_firewall.development  
+      id:                                                  <computed>  
+      allow.#:                                             "2"  
+      allow.1367131964.ports.#:                            "0"  
+      allow.1367131964.protocol:                           "icmp"  
+      allow.827249178.ports.#:                             "3"  
+      allow.827249178.ports.0:                             "22"  
+      allow.827249178.ports.1:                             "80"  
+      allow.827249178.ports.2:                             "443"  
+      allow.827249178.protocol:                            "tcp"  
+      creation_timestamp:                                  <computed>  
+      destination_ranges.#:                                <computed>  
+      direction:                                           <computed>  
+      name:                                                "development"  
+      network:                                             "gcp-2016-advent-calendar"  
+      priority:                                            "1000"  
+      project:                                             <computed>  
+      self_link:                                           <computed>  
+      source_ranges.#:                                     <computed>  
+      target_tags.#:                                       "2"  
+      target_tags.1812159334:                              "mass"  
+      target_tags.3235258666:                              "development"  
+  
+  + google_compute_instance.development  
+      id:                                                  <computed>  
+      boot_disk.#:                                         "1"  
+      boot_disk.0.auto_delete:                             "true"  
+      boot_disk.0.device_name:                             <computed>  
+      boot_disk.0.disk_encryption_key_sha256:              <computed>  
+      boot_disk.0.initialize_params.#:                     "1"  
+      boot_disk.0.initialize_params.0.image:               "ubuntu-os-cloud/ubuntu-1404-lts"  
+      boot_disk.0.initialize_params.0.size:                <computed>  
+      boot_disk.0.initialize_params.0.type:                <computed>  
+      can_ip_forward:                                      "false"  
+      cpu_platform:                                        <computed>  
+      create_timeout:                                      "4"  
+      deletion_protection:                                 "false"  
+      description:                                         "gcp-2016-advent-calendar"  
+      guest_accelerator.#:                                 <computed>  
+      instance_id:                                         <computed>  
+      label_fingerprint:                                   <computed>  
+      machine_type:                                        "n1-standard-1"  
+      metadata_fingerprint:                                <computed>  
+      name:                                                "development"  
+      network_interface.#:                                 "1"  
+      network_interface.0.access_config.#:                 "1"  
+      network_interface.0.access_config.0.assigned_nat_ip: <computed>  
+      network_interface.0.access_config.0.nat_ip:          <computed>  
+      network_interface.0.access_config.0.network_tier:    <computed>  
+      network_interface.0.address:                         <computed>  
+      network_interface.0.name:                            <computed>  
+      network_interface.0.network_ip:                      <computed>  
+      network_interface.0.subnetwork:                      "development"  
+      network_interface.0.subnetwork_project:              <computed>  
+      project:                                             <computed>  
+      scheduling.#:                                        "1"  
+      scheduling.0.automatic_restart:                      "true"  
+      scheduling.0.on_host_maintenance:                    "MIGRATE"  
+      scheduling.0.preemptible:                            "false"  
+      scratch_disk.#:                                      "1"  
+      scratch_disk.0.interface:                            "SCSI"  
+      self_link:                                           <computed>  
+      service_account.#:                                   "1"  
+      service_account.0.email:                             <computed>  
+      service_account.0.scopes.#:                          "5"  
+      service_account.0.scopes.1277378754:                 "https://www.googleapis.com/auth/monitoring"  
+      service_account.0.scopes.1632638332:                 "https://www.googleapis.com/auth/devstorage.read_only"  
+      service_account.0.scopes.2401844655:                 "https://www.googleapis.com/auth/bigquery"  
+      service_account.0.scopes.2428168921:                 "https://www.googleapis.com/auth/userinfo.email"  
+      service_account.0.scopes.2862113455:                 "https://www.googleapis.com/auth/compute.readonly"  
+      tags.#:                                              "2"  
+      tags.1812159334:                                     "mass"  
+      tags.3235258666:                                     "development"  
+      tags_fingerprint:                                    <computed>  
+      zone:                                                "us-east1-b"  
+  
+  + google_compute_network.gcp-2016-advent-calendar  
+      id:                                                  <computed>  
+      auto_create_subnetworks:                             "true"  
+      gateway_ipv4:                                        <computed>  
+      name:                                                "gcp-2016-advent-calendar"  
+      project:                                             <computed>  
+      routing_mode:                                        <computed>  
+      self_link:                                           <computed>  
+  
+  + google_compute_subnetwork.development  
+      id:                                                  <computed>  
+      creation_timestamp:                                  <computed>  
+      description:                                         "development"  
+      fingerprint:                                         <computed>  
+      gateway_address:                                     <computed>  
+      ip_cidr_range:                                       "10.30.0.0/16"  
+      name:                                                "development"  
+      network:                                             "gcp-2016-advent-calendar"  
+      project:                                             <computed>  
+      region:                                              "us-east1"  
+      secondary_ip_range.#:                                <computed>  
+      self_link:                                           <computed>  
+  
+  
+Plan: 4 to add, 0 to change, 0 to destroy.  
+  
+------------------------------------------------------------------------  
+  
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform  
+can't guarantee that exactly these actions will be performed if  
+"terraform apply" is subsequently run.  
+  
+  
+C:\Users\shino\doc\cdcidemo>  
+```  
+  
+## Terraform でアプライ  
+  
+ここから再開  
   
 ## サーバ側のデプロイの自動化  
   

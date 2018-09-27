@@ -3,8 +3,11 @@
 resource "google_compute_instance" "development" {
   name         = "development"
   machine_type = "n1-standard-1"
+  # zone         = "us-east1-b"
+  zone         = "asia-northeast1-b"
   zone         = "us-east1-b"
-  description  = "gcp-2016-advent-calendar"
+  # description  = "gcp-2016-advent-calendar"
+  description  = "cicddemo"
   tags         = ["development", "mass"]
 
 #  disk {
@@ -13,7 +16,8 @@ resource "google_compute_instance" "development" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-1404-lts"
+      # image = "ubuntu-os-cloud/ubuntu-1404-lts"
+      image = "projects/centos-cloud/global/images/centos-7-v20180911"
     }
   }
 

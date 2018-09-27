@@ -15,7 +15,8 @@ resource "google_compute_firewall" "development" {
   }
 
   # source_ranges = ["0.0.0.0/0"]
-  source_ranges = ["116.220.197.54/32"]
+  # source_ranges = ["116.220.197.54/32"]
+  source_ranges = ["116.220.197.54/32", "173.194.92.0/23"]
 
   target_tags = ["${google_compute_instance.development.tags}"]
 }

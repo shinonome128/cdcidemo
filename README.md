@@ -1318,6 +1318,31 @@ GCPコンソール上から削除されているかを確認
 ディスクは削除されている  
 ネットワークは削除されている  
   
+## git のリポジトリ名変更  
+  
+変更前  
+```  
+https://github.com/shinonome128/cdcidemo.git  
+```  
+  
+変更後  
+```  
+https://github.com/shinonome128/cicddemo.git  
+```  
+  
+Gitハブ上のGUIからリポジトリを変更  
+完了  
+  
+ローカルGitクライアントの事前確認  
+```  
+git remote -v  
+```  
+  
+ローカルのGitクライアントの向け先を変更  
+```  
+git remote set-url origin https://github.com/shinonome128/cicddemo.git  
+```  
+  
 ## Terrafrom によるバージョン管理方法  
   
 ここから再開  

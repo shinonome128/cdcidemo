@@ -31,6 +31,18 @@ resource "google_compute_instance" "development" {
   scratch_disk {
   }
 
+  // app install
+  metadata_startup_script = <<EOT
+#!/bin/sh 
+
+yum update -y 
+yum install -y httpd php 
+systemctl enable httpd.service 
+systemctl start httpd.service 
+firewall-cmd --add-service=http --permanent 
+firewall-cmd --reload 
+EOT
+
   network_interface {
     access_config {
       // Ephemeral IP

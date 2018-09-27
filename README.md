@@ -54,6 +54,7 @@ GCP サービスアカント、クレデンシャルファイル作成方法
 https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/  
   
 Terraform本家、GCPインスタンスのtfファイルのテンプレ  
+https://www.terraform.io/docs/providers/google/index.html  
   
 ## やること  
   
@@ -930,6 +931,394 @@ C:\Users\shino\doc\cdcidemo>
 ```  
   
 ## Terraform でアプライ  
+  
+環境構築  
+```  
+terraform apply terraform  
+```  
+```  
+Error: Error applying plan:  
+  
+1 error(s) occurred:  
+  
+* google_compute_network.gcp-2016-advent-calendar: 1 error(s) occurred:  
+  
+* google_compute_network.gcp-2016-advent-calendar: Error creating network: googleapi: Error 404: Failed to find project cicd-demo, notFound  
+  
+Terraform does not automatically rollback in the face of errors.  
+Instead, your Terraform state file has been partially updated with  
+any resources that successfully completed. Please address the error  
+above and apply again to incrementally change your infrastructure.  
+```  
+アプライ失敗、cicd-demo のプロジェクト名が無い？？  
+  
+方針  
+GCPコンソールからプロジェクト名を調査  
+  
+GCPコンソールからプロジェクト名を調査  
+```  
+プロジェクト名  
+cicd-demo  
+プロジェクト ID  
+cicd-demo-215605  
+```  
+  
+名とID、二つある、terraform の tf だとどちらをしているするのか調査  
+本家テンプレみると、project パラメータにはIDを指定する  
+```  
+// Configure the Google Cloud provider  
+provider "google" {  
+  credentials = "${file("account.json")}"  
+  project     = "my-gce-project-id"  
+  region      = "us-central1"  
+}  
+```  
+  
+リトライ  
+```  
+terraform apply terraform  
+```  
+  
+成功時のログ  
+```  
+C:\Users\shino\doc\cdcidemo>terraform apply terraform  
+  
+An execution plan has been generated and is shown below.  
+Resource actions are indicated with the following symbols:  
+  + create  
+  
+Terraform will perform the following actions:  
+  
+  + google_compute_firewall.development  
+      id:                                                  <computed>  
+      allow.#:                                             "2"  
+      allow.1367131964.ports.#:                            "0"  
+      allow.1367131964.protocol:                           "icmp"  
+      allow.827249178.ports.#:                             "3"  
+      allow.827249178.ports.0:                             "22"  
+      allow.827249178.ports.1:                             "80"  
+      allow.827249178.ports.2:                             "443"  
+      allow.827249178.protocol:                            "tcp"  
+      creation_timestamp:                                  <computed>  
+      destination_ranges.#:                                <computed>  
+      direction:                                           <computed>  
+      name:                                                "development"  
+      network:                                             "gcp-2016-advent-calendar"  
+      priority:                                            "1000"  
+      project:                                             <computed>  
+      self_link:                                           <computed>  
+      source_ranges.#:                                     <computed>  
+      target_tags.#:                                       "2"  
+      target_tags.1812159334:                              "mass"  
+      target_tags.3235258666:                              "development"  
+  
+  + google_compute_instance.development  
+      id:                                                  <computed>  
+      boot_disk.#:                                         "1"  
+      boot_disk.0.auto_delete:                             "true"  
+      boot_disk.0.device_name:                             <computed>  
+      boot_disk.0.disk_encryption_key_sha256:              <computed>  
+      boot_disk.0.initialize_params.#:                     "1"  
+      boot_disk.0.initialize_params.0.image:               "ubuntu-os-cloud/ubuntu-1404-lts"  
+      boot_disk.0.initialize_params.0.size:                <computed>  
+      boot_disk.0.initialize_params.0.type:                <computed>  
+      can_ip_forward:                                      "false"  
+      cpu_platform:                                        <computed>  
+      create_timeout:                                      "4"  
+      deletion_protection:                                 "false"  
+      description:                                         "gcp-2016-advent-calendar"  
+      guest_accelerator.#:                                 <computed>  
+      instance_id:                                         <computed>  
+      label_fingerprint:                                   <computed>  
+      machine_type:                                        "n1-standard-1"  
+      metadata_fingerprint:                                <computed>  
+      name:                                                "development"  
+      network_interface.#:                                 "1"  
+      network_interface.0.access_config.#:                 "1"  
+      network_interface.0.access_config.0.assigned_nat_ip: <computed>  
+      network_interface.0.access_config.0.nat_ip:          <computed>  
+      network_interface.0.access_config.0.network_tier:    <computed>  
+      network_interface.0.address:                         <computed>  
+      network_interface.0.name:                            <computed>  
+      network_interface.0.network_ip:                      <computed>  
+      network_interface.0.subnetwork:                      "development"  
+      network_interface.0.subnetwork_project:              <computed>  
+      project:                                             <computed>  
+      scheduling.#:                                        "1"  
+      scheduling.0.automatic_restart:                      "true"  
+      scheduling.0.on_host_maintenance:                    "MIGRATE"  
+      scheduling.0.preemptible:                            "false"  
+      scratch_disk.#:                                      "1"  
+      scratch_disk.0.interface:                            "SCSI"  
+      self_link:                                           <computed>  
+      service_account.#:                                   "1"  
+      service_account.0.email:                             <computed>  
+      service_account.0.scopes.#:                          "5"  
+      service_account.0.scopes.1277378754:                 "https://www.googleapis.com/auth/monitoring"  
+      service_account.0.scopes.1632638332:                 "https://www.googleapis.com/auth/devstorage.read_only"  
+      service_account.0.scopes.2401844655:                 "https://www.googleapis.com/auth/bigquery"  
+      service_account.0.scopes.2428168921:                 "https://www.googleapis.com/auth/userinfo.email"  
+      service_account.0.scopes.2862113455:                 "https://www.googleapis.com/auth/compute.readonly"  
+      tags.#:                                              "2"  
+      tags.1812159334:                                     "mass"  
+      tags.3235258666:                                     "development"  
+      tags_fingerprint:                                    <computed>  
+      zone:                                                "us-east1-b"  
+  
+  + google_compute_network.gcp-2016-advent-calendar  
+      id:                                                  <computed>  
+      auto_create_subnetworks:                             "true"  
+      gateway_ipv4:                                        <computed>  
+      name:                                                "gcp-2016-advent-calendar"  
+      project:                                             <computed>  
+      routing_mode:                                        <computed>  
+      self_link:                                           <computed>  
+  
+  + google_compute_subnetwork.development  
+      id:                                                  <computed>  
+      creation_timestamp:                                  <computed>  
+      description:                                         "development"  
+      fingerprint:                                         <computed>  
+      gateway_address:                                     <computed>  
+      ip_cidr_range:                                       "10.30.0.0/16"  
+      name:                                                "development"  
+      network:                                             "gcp-2016-advent-calendar"  
+      project:                                             <computed>  
+      region:                                              "us-east1"  
+      secondary_ip_range.#:                                <computed>  
+      self_link:                                           <computed>  
+  
+  
+Plan: 4 to add, 0 to change, 0 to destroy.  
+  
+Do you want to perform these actions?  
+  Terraform will perform the actions described above.  
+  Only 'yes' will be accepted to approve.  
+  
+  Enter a value: yes  
+  
+google_compute_network.gcp-2016-advent-calendar: Creating...  
+  auto_create_subnetworks: "" => "true"  
+  gateway_ipv4:            "" => "<computed>"  
+  name:                    "" => "gcp-2016-advent-calendar"  
+  project:                 "" => "<computed>"  
+  routing_mode:            "" => "<computed>"  
+  self_link:               "" => "<computed>"  
+google_compute_network.gcp-2016-advent-calendar: Still creating... (10s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still creating... (20s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still creating... (30s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Creation complete after 38s (ID: gcp-2016-advent-calendar)  
+google_compute_subnetwork.development: Creating...  
+  creation_timestamp:   "" => "<computed>"  
+  description:          "" => "development"  
+  fingerprint:          "" => "<computed>"  
+  gateway_address:      "" => "<computed>"  
+  ip_cidr_range:        "" => "10.30.0.0/16"  
+  name:                 "" => "development"  
+  network:              "" => "gcp-2016-advent-calendar"  
+  project:              "" => "<computed>"  
+  region:               "" => "us-east1"  
+  secondary_ip_range.#: "" => "<computed>"  
+  self_link:            "" => "<computed>"  
+google_compute_subnetwork.development: Still creating... (10s elapsed)  
+google_compute_subnetwork.development: Creation complete after 19s (ID: us-east1/development)  
+google_compute_instance.development: Creating...  
+  boot_disk.#:                                         "" => "1"  
+  boot_disk.0.auto_delete:                             "" => "true"  
+  boot_disk.0.device_name:                             "" => "<computed>"  
+  boot_disk.0.disk_encryption_key_sha256:              "" => "<computed>"  
+  boot_disk.0.initialize_params.#:                     "" => "1"  
+  boot_disk.0.initialize_params.0.image:               "" => "ubuntu-os-cloud/ubuntu-1404-lts"  
+  boot_disk.0.initialize_params.0.size:                "" => "<computed>"  
+  boot_disk.0.initialize_params.0.type:                "" => "<computed>"  
+  can_ip_forward:                                      "" => "false"  
+  cpu_platform:                                        "" => "<computed>"  
+  create_timeout:                                      "" => "4"  
+  deletion_protection:                                 "" => "false"  
+  description:                                         "" => "gcp-2016-advent-calendar"  
+  guest_accelerator.#:                                 "" => "<computed>"  
+  instance_id:                                         "" => "<computed>"  
+  label_fingerprint:                                   "" => "<computed>"  
+  machine_type:                                        "" => "n1-standard-1"  
+  metadata_fingerprint:                                "" => "<computed>"  
+  name:                                                "" => "development"  
+  network_interface.#:                                 "" => "1"  
+  network_interface.0.access_config.#:                 "" => "1"  
+  network_interface.0.access_config.0.assigned_nat_ip: "" => "<computed>"  
+  network_interface.0.access_config.0.nat_ip:          "" => "<computed>"  
+  network_interface.0.access_config.0.network_tier:    "" => "<computed>"  
+  network_interface.0.address:                         "" => "<computed>"  
+  network_interface.0.name:                            "" => "<computed>"  
+  network_interface.0.network_ip:                      "" => "<computed>"  
+  network_interface.0.subnetwork:                      "" => "development"  
+  network_interface.0.subnetwork_project:              "" => "<computed>"  
+  project:                                             "" => "<computed>"  
+  scheduling.#:                                        "" => "1"  
+  scheduling.0.automatic_restart:                      "" => "true"  
+  scheduling.0.on_host_maintenance:                    "" => "MIGRATE"  
+  scheduling.0.preemptible:                            "" => "false"  
+  scratch_disk.#:                                      "" => "1"  
+  scratch_disk.0.interface:                            "" => "SCSI"  
+  self_link:                                           "" => "<computed>"  
+  service_account.#:                                   "" => "1"  
+  service_account.0.email:                             "" => "<computed>"  
+  service_account.0.scopes.#:                          "" => "5"  
+  service_account.0.scopes.1277378754:                 "" => "https://www.googleapis.com/auth/monitoring"  
+  service_account.0.scopes.1632638332:                 "" => "https://www.googleapis.com/auth/devstorage.read_only"  
+  service_account.0.scopes.2401844655:                 "" => "https://www.googleapis.com/auth/bigquery"  
+  service_account.0.scopes.2428168921:                 "" => "https://www.googleapis.com/auth/userinfo.email"  
+  service_account.0.scopes.2862113455:                 "" => "https://www.googleapis.com/auth/compute.readonly"  
+  tags.#:                                              "" => "2"  
+  tags.1812159334:                                     "" => "mass"  
+  tags.3235258666:                                     "" => "development"  
+  tags_fingerprint:                                    "" => "<computed>"  
+  zone:                                                "" => "us-east1-b"  
+google_compute_instance.development: Still creating... (10s elapsed)  
+google_compute_instance.development: Still creating... (20s elapsed)  
+google_compute_instance.development: Creation complete after 30s (ID: development)  
+google_compute_firewall.development: Creating...  
+  allow.#:                   "" => "2"  
+  allow.1367131964.ports.#:  "" => "0"  
+  allow.1367131964.protocol: "" => "icmp"  
+  allow.827249178.ports.#:   "" => "3"  
+  allow.827249178.ports.0:   "" => "22"  
+  allow.827249178.ports.1:   "" => "80"  
+  allow.827249178.ports.2:   "" => "443"  
+  allow.827249178.protocol:  "" => "tcp"  
+  creation_timestamp:        "" => "<computed>"  
+  destination_ranges.#:      "" => "<computed>"  
+  direction:                 "" => "<computed>"  
+  name:                      "" => "development"  
+  network:                   "" => "gcp-2016-advent-calendar"  
+  priority:                  "" => "1000"  
+  project:                   "" => "<computed>"  
+  self_link:                 "" => "<computed>"  
+  source_ranges.#:           "" => "<computed>"  
+  target_tags.#:             "" => "2"  
+  target_tags.1812159334:    "" => "mass"  
+  target_tags.3235258666:    "" => "development"  
+google_compute_firewall.development: Still creating... (10s elapsed)  
+google_compute_firewall.development: Creation complete after 12s (ID: development)  
+  
+Apply complete! Resources: 4 added, 0 changed, 0 destroyed.  
+  
+C:\Users\shino\doc\cdcidemo>  
+```  
+  
+GCPコンソールからインスタンスが作成されているかを確認  
+OK、きちんと作成されている  
+外部IPにも直接公開されてるっぽい  
+  
+## Terraform によるデストロイ  
+  
+作成環境の削除前チェックと削除  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+削除時のログ  
+```  
+C:\Users\shino\doc\cdcidemo>terraform plan -destroy terraform  
+Refreshing Terraform state in-memory prior to plan...  
+The refreshed state will be used to calculate this plan, but will not be  
+persisted to local or remote state storage.  
+  
+google_compute_network.gcp-2016-advent-calendar: Refreshing state... (ID: gcp-2016-advent-calendar)  
+google_compute_subnetwork.development: Refreshing state... (ID: us-east1/development)  
+google_compute_instance.development: Refreshing state... (ID: development)  
+google_compute_firewall.development: Refreshing state... (ID: development)  
+  
+------------------------------------------------------------------------  
+  
+An execution plan has been generated and is shown below.  
+Resource actions are indicated with the following symbols:  
+  - destroy  
+  
+Terraform will perform the following actions:  
+  
+  - google_compute_firewall.development  
+  
+  - google_compute_instance.development  
+  
+  - google_compute_network.gcp-2016-advent-calendar  
+  
+  - google_compute_subnetwork.development  
+  
+  
+Plan: 0 to add, 0 to change, 4 to destroy.  
+  
+------------------------------------------------------------------------  
+  
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform  
+can't guarantee that exactly these actions will be performed if  
+"terraform apply" is subsequently run.  
+  
+  
+C:\Users\shino\doc\cdcidemo>  
+C:\Users\shino\doc\cdcidemo>  
+C:\Users\shino\doc\cdcidemo>terraform destroy terraform  
+google_compute_network.gcp-2016-advent-calendar: Refreshing state... (ID: gcp-2016-advent-calendar)  
+google_compute_subnetwork.development: Refreshing state... (ID: us-east1/development)  
+google_compute_instance.development: Refreshing state... (ID: development)  
+google_compute_firewall.development: Refreshing state... (ID: development)  
+  
+An execution plan has been generated and is shown below.  
+Resource actions are indicated with the following symbols:  
+  - destroy  
+  
+Terraform will perform the following actions:  
+  
+  - google_compute_firewall.development  
+  
+  - google_compute_instance.development  
+  
+  - google_compute_network.gcp-2016-advent-calendar  
+  
+  - google_compute_subnetwork.development  
+  
+  
+Plan: 0 to add, 0 to change, 4 to destroy.  
+  
+Do you really want to destroy all resources?  
+  Terraform will destroy all your managed infrastructure, as shown above.  
+  There is no undo. Only 'yes' will be accepted to confirm.  
+  
+  Enter a value: yes  
+  
+google_compute_firewall.development: Destroying... (ID: development)  
+google_compute_firewall.development: Still destroying... (ID: development, 10s elapsed)  
+google_compute_firewall.development: Destruction complete after 12s  
+google_compute_instance.development: Destroying... (ID: development)  
+google_compute_instance.development: Still destroying... (ID: development, 10s elapsed)  
+google_compute_instance.development: Still destroying... (ID: development, 20s elapsed)  
+google_compute_instance.development: Still destroying... (ID: development, 30s elapsed)  
+google_compute_instance.development: Still destroying... (ID: development, 40s elapsed)  
+google_compute_instance.development: Still destroying... (ID: development, 50s elapsed)  
+google_compute_instance.development: Still destroying... (ID: development, 1m0s elapsed)  
+google_compute_instance.development: Destruction complete after 1m8s  
+google_compute_subnetwork.development: Destroying... (ID: us-east1/development)  
+google_compute_subnetwork.development: Still destroying... (ID: us-east1/development, 10s elapsed)  
+google_compute_subnetwork.development: Destruction complete after 18s  
+google_compute_network.gcp-2016-advent-calendar: Destroying... (ID: gcp-2016-advent-calendar)  
+google_compute_network.gcp-2016-advent-calendar: Still destroying... (ID: gcp-2016-advent-calendar, 10s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still destroying... (ID: gcp-2016-advent-calendar, 20s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still destroying... (ID: gcp-2016-advent-calendar, 30s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still destroying... (ID: gcp-2016-advent-calendar, 40s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Still destroying... (ID: gcp-2016-advent-calendar, 50s elapsed)  
+google_compute_network.gcp-2016-advent-calendar: Destruction complete after 59s  
+  
+Destroy complete! Resources: 4 destroyed.  
+  
+C:\Users\shino\doc\cdcidemo>  
+```  
+  
+GCPコンソール上から削除されているかを確認  
+インスタンスは削除というよりも無効化されている、多分、プロジェクト削除時と同じで、24時間後に完全削除されると思われる  
+ディスクは削除されている  
+ネットワークは削除されている  
+  
+## Terrafrom によるバージョン管理方法  
   
 ここから再開  
   

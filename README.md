@@ -62,6 +62,16 @@ https://qiita.com/minoringo/items/917e325892733e0d606e
 terraform ステート管理をバージョンコントロールすべきかの議論  
 https://stackoverflow.com/questions/38486335/should-i-commit-tfstate-files-to-git  
   
+GCP + Terraform、外国のワークショップ、tf モジュール化やサンプルテンプレートが参考になる、フロントエンドのLB部分はIstio 採用時に参考になるかもしれない  
+https://github.com/steinim/gcp-terraform-workshop  
+https://github.com/tasdikrahman/terraform-gcp-examples  
+  
+terraform インスタンス起動時のスタートアップシェルの改造方法  
+https://techblog.gmo-ap.jp/2017/11/16/terraform%E3%81%A7gcp%E7%92%B0%E5%A2%83%E3%82%92%E6%A7%8B%E7%AF%89%E3%81%97%E3%81%A6%E3%81%BF%E3%82%8B/  
+  
+terraform インスタンス起動時のスタートアップシェルの改造方法、本家  
+https://www.terraform.io/docs/providers/google/r/compute_instance.html  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -1601,5 +1611,356 @@ tf ファイルで指定したディレクトリ名にドット付きのファ�
 ```  
   
 ## サーバ側のデプロイの自動化  
+  
+方針  
+tf ファイルを編集してゆく  
+centos を最も小さいサイズで起動  
+GCPのfirewall で自宅からのアクセスに制限する  
+ネットワーク名とかインスタンス名は適当に変更する  
+サーバインフラ構築後、yum で apacheインスト、 firewall許可  
+  
+gcp_provider.tf  
+東京リージョンに変更  
+```  
+asia-northeast1  
+```  
+  
+gcp_network.tf  
+ネットワーク名をcicddemo に変更  
+東京リージョンに変更  
+```  
+cicddemo  
+```  
+```  
+asia-northeast1  
+```  
+  
+gcp_firewall.tf  
+ネットワーク名をcicddemo に変更  
+グローバルIPを追加  
+```  
+cicddemo  
+```  
+```  
+116.220.197.54  
+```  
+  
+gcp_instances.tf  
+東京リージョンのゾーンに変更  
+ディスクリプションを変更  
+centos に変更  
+```  
+asia-northeast1-b  
+```  
+```  
+cicddemo  
+```  
+```  
+projects/centos-cloud/global/images/centos-7-v20180911  
+```  
+OSのパラメータはそのまま、tf がGCP APIに渡しているので、GCPコンソールからイメージ作成メニューを開き、REST 取得する、ACIと同じだね  
+  
+変更確認  
+```  
+terraform plan terraform  
+```  
+モーマンタイ  
+  
+gcp_instances.tf  
+サーバインフラ構築後、yum で apacheインスト  
+下記の部分の制御を追加する  
+```  
+resource "sakuracloud_note" "init" {  
+  name  = "install-php"  
+  class = "shell"  
+  
+  content = << EOF  
+#!/bin/sh  
+  
+yum update -y  
+yum install -y httpd php  
+systemctl enable httpd.service  
+systemctl start httpd.service  
+firewall-cmd --add-service=http --permanent  
+firewall-cmd --reload  
+EOF  
+}  
+```  
+読み込み先  
+```  
+  startup_script_ids = ["${sakuracloud_note.init.id}"]  
+```  
+tf 本家でスタートアップで使っているので、モジュール化すればよい  
+```  
+  metadata_startup_script = "echo hi > /test.txt"  
+```  
+GMOでのお手本、リソースの中にベタ打ち  
+```  
+  metadata_startup_script = <<EOT  
+yum install -y policycoreutils-python  
+semanage port -a -t ssh_port_t -p tcp 10022  
+sed -i 's/^#Port 22/Port 22\nPort 10022/' /etc/ssh/sshd_config  
+systemctl restart sshd  
+timedatectl set-timezone Asia/Tokyo  
+EOT  
+```  
+  
+変更確認  
+```  
+terraform init  
+terraform plan terraform  
+```  
+モーマンタイ  
+  
+ディプロイ  
+```  
+terraform apply terraform  
+```  
+```  
+Error: Error applying plan:  
+  
+1 error(s) occurred:  
+  
+* google_compute_instance.development: 1 error(s) occurred:  
+  
+* google_compute_instance.development: Error creating instance: googleapi: Error 400: Invalid value for field 'resource.networkInterfaces[0].subnetwork': 'projects/cicd-demo-215605/regions/us-east1/subnetworks/development'. The referenced subnetwork resource cannot be found., invalid  
+  
+Terraform does not automatically rollback in the face of errors.  
+Instead, your Terraform state file has been partially updated with  
+any resources that successfully completed. Please address the error  
+above and apply again to incrementally change your infrastructure.  
+```  
+あらー、なんか問題発生しとる、us-east1 のリージョン名が間違ってる  
+  
+リトライ  
+```  
+terraform apply terraform  
+```  
+  
+成功時のログ  
+```  
+C:\Users\shino\doc\cicddemo>terraform apply terraform  
+google_compute_network.cicddemo: Refreshing state... (ID: cicddemo)  
+google_compute_subnetwork.development: Refreshing state... (ID: asia-northeast1/development)  
+  
+An execution plan has been generated and is shown below.  
+Resource actions are indicated with the following symbols:  
+  + create  
+  
+Terraform will perform the following actions:  
+  
+  + google_compute_firewall.development  
+      id:                                                  <computed>  
+      allow.#:                                             "2"  
+      allow.1367131964.ports.#:                            "0"  
+      allow.1367131964.protocol:                           "icmp"  
+      allow.827249178.ports.#:                             "3"  
+      allow.827249178.ports.0:                             "22"  
+      allow.827249178.ports.1:                             "80"  
+      allow.827249178.ports.2:                             "443"  
+      allow.827249178.protocol:                            "tcp"  
+      creation_timestamp:                                  <computed>  
+      destination_ranges.#:                                <computed>  
+      direction:                                           <computed>  
+      name:                                                "development"  
+      network:                                             "cicddemo"  
+      priority:                                            "1000"  
+      project:                                             <computed>  
+      self_link:                                           <computed>  
+      source_ranges.#:                                     "1"  
+      source_ranges.3425672128:                            "116.220.197.54/32"  
+      target_tags.#:                                       "2"  
+      target_tags.1812159334:                              "mass"  
+      target_tags.3235258666:                              "development"  
+  
+  + google_compute_instance.development  
+      id:                                                  <computed>  
+      boot_disk.#:                                         "1"  
+      boot_disk.0.auto_delete:                             "true"  
+      boot_disk.0.device_name:                             <computed>  
+      boot_disk.0.disk_encryption_key_sha256:              <computed>  
+      boot_disk.0.initialize_params.#:                     "1"  
+      boot_disk.0.initialize_params.0.image:               "projects/centos-cloud/global/images/centos-7-v20180911"  
+      boot_disk.0.initialize_params.0.size:                <computed>  
+      boot_disk.0.initialize_params.0.type:                <computed>  
+      can_ip_forward:                                      "false"  
+      cpu_platform:                                        <computed>  
+      create_timeout:                                      "4"  
+      deletion_protection:                                 "false"  
+      description:                                         "cicddemo"  
+      guest_accelerator.#:                                 <computed>  
+      instance_id:                                         <computed>  
+      label_fingerprint:                                   <computed>  
+      machine_type:                                        "n1-standard-1"  
+      metadata_fingerprint:                                <computed>  
+      metadata_startup_script:                             "#!/bin/sh \n\nyum update -y \nyum install -y httpd php \nsystemctl enable httpd.service \nsystemctl start httpd.service \nfirewall-cmd --add-service=http --permanent \nfirewall-cmd --reload \n"  
+      name:                                                "development"  
+      network_interface.#:                                 "1"  
+      network_interface.0.access_config.#:                 "1"  
+      network_interface.0.access_config.0.assigned_nat_ip: <computed>  
+      network_interface.0.access_config.0.nat_ip:          <computed>  
+      network_interface.0.access_config.0.network_tier:    <computed>  
+      network_interface.0.address:                         <computed>  
+      network_interface.0.name:                            <computed>  
+      network_interface.0.network_ip:                      <computed>  
+      network_interface.0.subnetwork:                      "development"  
+      network_interface.0.subnetwork_project:              <computed>  
+      project:                                             <computed>  
+      scheduling.#:                                        "1"  
+      scheduling.0.automatic_restart:                      "true"  
+      scheduling.0.on_host_maintenance:                    "MIGRATE"  
+      scheduling.0.preemptible:                            "false"  
+      scratch_disk.#:                                      "1"  
+      scratch_disk.0.interface:                            "SCSI"  
+      self_link:                                           <computed>  
+      service_account.#:                                   "1"  
+      service_account.0.email:                             <computed>  
+      service_account.0.scopes.#:                          "5"  
+      service_account.0.scopes.1277378754:                 "https://www.googleapis.com/auth/monitoring"  
+      service_account.0.scopes.1632638332:                 "https://www.googleapis.com/auth/devstorage.read_only"  
+      service_account.0.scopes.2401844655:                 "https://www.googleapis.com/auth/bigquery"  
+      service_account.0.scopes.2428168921:                 "https://www.googleapis.com/auth/userinfo.email"  
+      service_account.0.scopes.2862113455:                 "https://www.googleapis.com/auth/compute.readonly"  
+      tags.#:                                              "2"  
+      tags.1812159334:                                     "mass"  
+      tags.3235258666:                                     "development"  
+      tags_fingerprint:                                    <computed>  
+      zone:                                                "asia-northeast1-b"  
+  
+  
+Plan: 2 to add, 0 to change, 0 to destroy.  
+  
+Do you want to perform these actions?  
+  Terraform will perform the actions described above.  
+  Only 'yes' will be accepted to approve.  
+  
+  Enter a value: yes  
+  
+google_compute_instance.development: Creating...  
+  boot_disk.#:                                         "" => "1"  
+  boot_disk.0.auto_delete:                             "" => "true"  
+  boot_disk.0.device_name:                             "" => "<computed>"  
+  boot_disk.0.disk_encryption_key_sha256:              "" => "<computed>"  
+  boot_disk.0.initialize_params.#:                     "" => "1"  
+  boot_disk.0.initialize_params.0.image:               "" => "projects/centos-cloud/global/images/centos-7-v20180911"  
+  boot_disk.0.initialize_params.0.size:                "" => "<computed>"  
+  boot_disk.0.initialize_params.0.type:                "" => "<computed>"  
+  can_ip_forward:                                      "" => "false"  
+  cpu_platform:                                        "" => "<computed>"  
+  create_timeout:                                      "" => "4"  
+  deletion_protection:                                 "" => "false"  
+  description:                                         "" => "cicddemo"  
+  guest_accelerator.#:                                 "" => "<computed>"  
+  instance_id:                                         "" => "<computed>"  
+  label_fingerprint:                                   "" => "<computed>"  
+  machine_type:                                        "" => "n1-standard-1"  
+  metadata_fingerprint:                                "" => "<computed>"  
+  metadata_startup_script:                             "" => "#!/bin/sh \n\nyum update -y \nyum install -y httpd php \nsystemctl enable httpd.service \nsystemctl start httpd.service \nfirewall-cmd --add-service=http --permanent \nfirewall-cmd --reload \n"  
+  name:                                                "" => "development"  
+  network_interface.#:                                 "" => "1"  
+  network_interface.0.access_config.#:                 "" => "1"  
+  network_interface.0.access_config.0.assigned_nat_ip: "" => "<computed>"  
+  network_interface.0.access_config.0.nat_ip:          "" => "<computed>"  
+  network_interface.0.access_config.0.network_tier:    "" => "<computed>"  
+  network_interface.0.address:                         "" => "<computed>"  
+  network_interface.0.name:                            "" => "<computed>"  
+  network_interface.0.network_ip:                      "" => "<computed>"  
+  network_interface.0.subnetwork:                      "" => "development"  
+  network_interface.0.subnetwork_project:              "" => "<computed>"  
+  project:                                             "" => "<computed>"  
+  scheduling.#:                                        "" => "1"  
+  scheduling.0.automatic_restart:                      "" => "true"  
+  scheduling.0.on_host_maintenance:                    "" => "MIGRATE"  
+  scheduling.0.preemptible:                            "" => "false"  
+  scratch_disk.#:                                      "" => "1"  
+  scratch_disk.0.interface:                            "" => "SCSI"  
+  self_link:                                           "" => "<computed>"  
+  service_account.#:                                   "" => "1"  
+  service_account.0.email:                             "" => "<computed>"  
+  service_account.0.scopes.#:                          "" => "5"  
+  service_account.0.scopes.1277378754:                 "" => "https://www.googleapis.com/auth/monitoring"  
+  service_account.0.scopes.1632638332:                 "" => "https://www.googleapis.com/auth/devstorage.read_only"  
+  service_account.0.scopes.2401844655:                 "" => "https://www.googleapis.com/auth/bigquery"  
+  service_account.0.scopes.2428168921:                 "" => "https://www.googleapis.com/auth/userinfo.email"  
+  service_account.0.scopes.2862113455:                 "" => "https://www.googleapis.com/auth/compute.readonly"  
+  tags.#:                                              "" => "2"  
+  tags.1812159334:                                     "" => "mass"  
+  tags.3235258666:                                     "" => "development"  
+  tags_fingerprint:                                    "" => "<computed>"  
+  zone:                                                "" => "asia-northeast1-b"  
+google_compute_instance.development: Still creating... (10s elapsed)  
+google_compute_instance.development: Still creating... (20s elapsed)  
+google_compute_instance.development: Creation complete after 30s (ID: development)  
+google_compute_firewall.development: Creating...  
+  allow.#:                   "" => "2"  
+  allow.1367131964.ports.#:  "" => "0"  
+  allow.1367131964.protocol: "" => "icmp"  
+  allow.827249178.ports.#:   "" => "3"  
+  allow.827249178.ports.0:   "" => "22"  
+  allow.827249178.ports.1:   "" => "80"  
+  allow.827249178.ports.2:   "" => "443"  
+  allow.827249178.protocol:  "" => "tcp"  
+  creation_timestamp:        "" => "<computed>"  
+  destination_ranges.#:      "" => "<computed>"  
+  direction:                 "" => "<computed>"  
+  name:                      "" => "development"  
+  network:                   "" => "cicddemo"  
+  priority:                  "" => "1000"  
+  project:                   "" => "<computed>"  
+  self_link:                 "" => "<computed>"  
+  source_ranges.#:           "" => "1"  
+  source_ranges.3425672128:  "" => "116.220.197.54/32"  
+  target_tags.#:             "" => "2"  
+  target_tags.1812159334:    "" => "mass"  
+  target_tags.3235258666:    "" => "development"  
+google_compute_firewall.development: Still creating... (10s elapsed)  
+google_compute_firewall.development: Creation complete after 12s (ID: development)  
+  
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.  
+  
+C:\Users\shino\doc\cicddemo>  
+```  
+  
+GCPコンソールから確認  
+ブラウザベースのSSHができない・・・  
+IPソースレンジを開放してブラウザベースで接続してからnetstat  
+```  
+[shinonome128@development ~]$ netstat -na | grep ES  
+tcp        0     64 10.30.0.2:22            173.194.93.35:54274     ESTABLISHED  
+tcp        0      0 10.30.0.2:44238         169.254.169.254:80      ESTABLISHED  
+tcp        0      0 10.30.0.2:44236         169.254.169.254:80      ESTABLISHED  
+tcp        0      0 10.30.0.2:44240         169.254.169.254:80      ESTABLISHED  
+[shinonome128@development ~]$  
+```  
+173.194.93.54 はGoogle LLC　これがルールに必要  
+173.194.92.0/23 - GOOGLE  
+```  
+173.194.92.0/23  
+```  
+  
+一度環境削除  
+  
+作成環境の削除前チェックと削除  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+解消！！  
+  
+最後は壊す  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+## サーバアプリケーションの展開  
+  
+ここから再開  
   
 以上  

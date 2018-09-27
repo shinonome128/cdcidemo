@@ -56,6 +56,12 @@ https://www.magellanic-clouds.com/blocks/guide/create-gcp-service-account-key/
 Terraform本家、GCPインスタンスのtfファイルのテンプレ  
 https://www.terraform.io/docs/providers/google/index.html  
   
+Gitクライアントでリポジトリの向け先を変更する方法  
+https://qiita.com/minoringo/items/917e325892733e0d606e  
+  
+terraform ステート管理をバージョンコントロールすべきかの議論  
+https://stackoverflow.com/questions/38486335/should-i-commit-tfstate-files-to-git  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -1343,9 +1349,256 @@ git remote -v
 git remote set-url origin https://github.com/shinonome128/cicddemo.git  
 ```  
   
-## Terrafrom によるバージョン管理方法  
+## Terrafrom によるステート管理方法  
   
-ここから再開  
+tf ファイルで指定したディレクトリ名にドット付きのファイル名が生成される  
+```  
+2018/09/27  19:38    <DIR>          terraform  
+2018/09/27  19:50               317 terraform.tfstate  
+2018/09/27  19:48            11,846 terraform.tfstate.backup  
+```  
+  
+環境削除前の状態  
+```  
+{  
+    "version": 3,  
+    "terraform_version": "0.11.8",  
+    "serial": 3,  
+    "lineage": "131bdbc2-582c-862a-da65-b8923e3806a1",  
+    "modules": [  
+        {  
+            "path": [  
+                "root"  
+            ],  
+            "outputs": {},  
+            "resources": {  
+                "google_compute_firewall.development": {  
+                    "type": "google_compute_firewall",  
+                    "depends_on": [  
+                        "google_compute_instance.development",  
+                        "google_compute_network.gcp-2016-advent-calendar"  
+                    ],  
+                    "primary": {  
+                        "id": "development",  
+                        "attributes": {  
+                            "allow.#": "2",  
+                            "allow.1367131964.ports.#": "0",  
+                            "allow.1367131964.protocol": "icmp",  
+                            "allow.827249178.ports.#": "3",  
+                            "allow.827249178.ports.0": "22",  
+                            "allow.827249178.ports.1": "80",  
+                            "allow.827249178.ports.2": "443",  
+                            "allow.827249178.protocol": "tcp",  
+                            "creation_timestamp": "2018-09-27T03:27:14.849-07:00",  
+                            "deny.#": "0",  
+                            "description": "",  
+                            "destination_ranges.#": "0",  
+                            "direction": "INGRESS",  
+                            "disabled": "false",  
+                            "enable_logging": "false",  
+                            "id": "development",  
+                            "name": "development",  
+                            "network": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/global/networks/gcp-2016-advent-calendar",  
+                            "priority": "1000",  
+                            "project": "cicd-demo-215605",  
+                            "self_link": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/global/firewalls/development",  
+                            "source_ranges.#": "1",  
+                            "source_ranges.1080289494": "0.0.0.0/0",  
+                            "source_service_accounts.#": "0",  
+                            "source_tags.#": "0",  
+                            "target_service_accounts.#": "0",  
+                            "target_tags.#": "2",  
+                            "target_tags.1812159334": "mass",  
+                            "target_tags.3235258666": "development"  
+                        },  
+                        "meta": {  
+                            "e2bfb730-ecaa-11e6-8f88-34363bc7c4c0": {  
+                                "create": 240000000000,  
+                                "delete": 240000000000,  
+                                "update": 240000000000  
+                            },  
+                            "schema_version": "1"  
+                        },  
+                        "tainted": false  
+                    },  
+                    "deposed": [],  
+                    "provider": "provider.google"  
+                },  
+                "google_compute_instance.development": {  
+                    "type": "google_compute_instance",  
+                    "depends_on": [  
+                        "google_compute_subnetwork.development"  
+                    ],  
+                    "primary": {  
+                        "id": "development",  
+                        "attributes": {  
+                            "attached_disk.#": "0",  
+                            "boot_disk.#": "1",  
+                            "boot_disk.0.auto_delete": "true",  
+                            "boot_disk.0.device_name": "persistent-disk-0",  
+                            "boot_disk.0.disk_encryption_key_raw": "",  
+                            "boot_disk.0.disk_encryption_key_sha256": "",  
+                            "boot_disk.0.initialize_params.#": "1",  
+                            "boot_disk.0.initialize_params.0.image": "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1404-trusty-v20180913",  
+                            "boot_disk.0.initialize_params.0.size": "10",  
+                            "boot_disk.0.initialize_params.0.type": "pd-standard",  
+                            "boot_disk.0.source": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/zones/us-east1-b/disks/development",  
+                            "can_ip_forward": "false",  
+                            "cpu_platform": "Intel Haswell",  
+                            "create_timeout": "4",  
+                            "deletion_protection": "false",  
+                            "description": "gcp-2016-advent-calendar",  
+                            "guest_accelerator.#": "0",  
+                            "id": "development",  
+                            "instance_id": "2571438154032680585",  
+                            "label_fingerprint": "42WmSpB8rSM=",  
+                            "labels.%": "0",  
+                            "machine_type": "n1-standard-1",  
+                            "metadata.%": "0",  
+                            "metadata_fingerprint": "kSzwCHeRbWU=",  
+                            "metadata_startup_script": "",  
+                            "min_cpu_platform": "",  
+                            "name": "development",  
+                            "network_interface.#": "1",  
+                            "network_interface.0.access_config.#": "1",  
+                            "network_interface.0.access_config.0.assigned_nat_ip": "35.229.95.157",  
+                            "network_interface.0.access_config.0.nat_ip": "35.229.95.157",  
+                            "network_interface.0.access_config.0.network_tier": "PREMIUM",  
+                            "network_interface.0.access_config.0.public_ptr_domain_name": "",  
+                            "network_interface.0.address": "10.30.0.2",  
+                            "network_interface.0.alias_ip_range.#": "0",  
+                            "network_interface.0.name": "nic0",  
+                            "network_interface.0.network": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/global/networks/gcp-2016-advent-calendar",  
+                            "network_interface.0.network_ip": "10.30.0.2",  
+                            "network_interface.0.subnetwork": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/regions/us-east1/subnetworks/development",  
+                            "network_interface.0.subnetwork_project": "cicd-demo-215605",  
+                            "project": "cicd-demo-215605",  
+                            "scheduling.#": "1",  
+                            "scheduling.0.automatic_restart": "true",  
+                            "scheduling.0.on_host_maintenance": "MIGRATE",  
+                            "scheduling.0.preemptible": "false",  
+                            "scratch_disk.#": "1",  
+                            "scratch_disk.0.interface": "SCSI",  
+                            "self_link": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/zones/us-east1-b/instances/development",  
+                            "service_account.#": "1",  
+                            "service_account.0.email": "824533405532-compute@developer.gserviceaccount.com",  
+                            "service_account.0.scopes.#": "5",  
+                            "service_account.0.scopes.1277378754": "https://www.googleapis.com/auth/monitoring",  
+                            "service_account.0.scopes.1632638332": "https://www.googleapis.com/auth/devstorage.read_only",  
+                            "service_account.0.scopes.2401844655": "https://www.googleapis.com/auth/bigquery",  
+                            "service_account.0.scopes.2428168921": "https://www.googleapis.com/auth/userinfo.email",  
+                            "service_account.0.scopes.2862113455": "https://www.googleapis.com/auth/compute.readonly",  
+                            "tags.#": "2",  
+                            "tags.1812159334": "mass",  
+                            "tags.3235258666": "development",  
+                            "tags_fingerprint": "HGyaLRKG3mY=",  
+                            "zone": "us-east1-b"  
+                        },  
+                        "meta": {  
+                            "e2bfb730-ecaa-11e6-8f88-34363bc7c4c0": {  
+                                "create": 360000000000,  
+                                "delete": 360000000000,  
+                                "update": 360000000000  
+                            },  
+                            "schema_version": "6"  
+                        },  
+                        "tainted": false  
+                    },  
+                    "deposed": [],  
+                    "provider": "provider.google"  
+                },  
+                "google_compute_network.gcp-2016-advent-calendar": {  
+                    "type": "google_compute_network",  
+                    "depends_on": [],  
+                    "primary": {  
+                        "id": "gcp-2016-advent-calendar",  
+                        "attributes": {  
+                            "auto_create_subnetworks": "true",  
+                            "description": "",  
+                            "gateway_ipv4": "",  
+                            "id": "gcp-2016-advent-calendar",  
+                            "ipv4_range": "",  
+                            "name": "gcp-2016-advent-calendar",  
+                            "project": "cicd-demo-215605",  
+                            "routing_mode": "REGIONAL",  
+                            "self_link": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/global/networks/gcp-2016-advent-calendar"  
+                        },  
+                        "meta": {},  
+                        "tainted": false  
+                    },  
+                    "deposed": [],  
+                    "provider": "provider.google"  
+                },  
+                "google_compute_subnetwork.development": {  
+                    "type": "google_compute_subnetwork",  
+                    "depends_on": [  
+                        "google_compute_network.gcp-2016-advent-calendar"  
+                    ],  
+                    "primary": {  
+                        "id": "us-east1/development",  
+                        "attributes": {  
+                            "creation_timestamp": "2018-09-27T03:26:26.147-07:00",  
+                            "description": "development",  
+                            "enable_flow_logs": "false",  
+                            "fingerprint": "7HGno5zKSJE=",  
+                            "gateway_address": "10.30.0.1",  
+                            "id": "us-east1/development",  
+                            "ip_cidr_range": "10.30.0.0/16",  
+                            "name": "development",  
+                            "network": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/global/networks/gcp-2016-advent-calendar",  
+                            "private_ip_google_access": "false",  
+                            "project": "cicd-demo-215605",  
+                            "region": "us-east1",  
+                            "secondary_ip_range.#": "0",  
+                            "self_link": "https://www.googleapis.com/compute/v1/projects/cicd-demo-215605/regions/us-east1/subnetworks/development"  
+                        },  
+                        "meta": {  
+                            "e2bfb730-ecaa-11e6-8f88-34363bc7c4c0": {  
+                                "create": 360000000000,  
+                                "delete": 360000000000,  
+                                "update": 360000000000  
+                            }  
+                        },  
+                        "tainted": false  
+                    },  
+                    "deposed": [],  
+                    "provider": "provider.google"  
+                }  
+            },  
+            "depends_on": []  
+        }  
+    ]  
+}  
+```  
+  
+環境削除時の状態  
+```  
+{  
+    "version": 3,  
+    "terraform_version": "0.11.8",  
+    "serial": 3,  
+    "lineage": "131bdbc2-582c-862a-da65-b8923e3806a1",  
+    "modules": [  
+        {  
+            "path": [  
+                "root"  
+            ],  
+            "outputs": {},  
+            "resources": {},  
+            "depends_on": []  
+        }  
+    ]  
+}  
+```  
+  
+複数人でリリース作業が重複する可能性がある場合は、外部ストレージにおいて、terraform からリモート参照させることで管理する  
+多分、CICD環境作るときは、CIツールとterraformを動作させるので、そこでステートファイルを参照できるようにしておく  
+秘匿性の高い情報が含まれるの公開バージョン管理はしない  
+なので.gitignore に追記しておく  
+```  
+*.tfstate  
+*.tfstate.backup  
+```  
   
 ## サーバ側のデプロイの自動化  
   

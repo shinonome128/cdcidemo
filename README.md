@@ -9,7 +9,7 @@ CICD環境の構築
 ## 参考  
   
 ドキュメント・コード管理  
-https://github.com/shinonome128/cdcidemo  
+https://github.com/shinonome128/cicddemo  
   
 山本和道さんの道場、ハンズオン形式でわかりやすい、全11回  
 https://knowledge.sakura.ad.jp/author/kazumichi_yamamoto/  

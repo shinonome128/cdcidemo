@@ -1961,6 +1961,51 @@ terraform destroy terraform
   
 ## サーバアプリケーションの展開  
   
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+インフラ構築完了したらGCPコンソール経由でサーバにログイン  
+Gitでサーバアプリを展開  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-server  
+cd devops-example-server  
+cp example.php /var/www/html/  
+```  
+[shinonome128@development ~]$ git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-  
+server  
+-bash: git: command not found  
+[shinonome128@development ~]$ sudo git  
+sudo: git: command not found  
+[shinonome128@development ~]$  
+```  
+なんと、Git が入っとらん。。  
+  
+Git をインストール  
+```  
+sudo yum install -y git  
+```  
+  
+リトライ  
+Gitでサーバアプリを展開  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-server  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+  
+アクセステスト  
+```  
+curl http://10.30.0.2/example.php  
+curl http://35.221.101.2/example.php  
+```  
+グローバルからアクセスできない、多分フィルタに引っかかっている  
+自宅グローバルで再度テストすること  
+  
 ここから再開  
+  
+スタートスクリプトにGit インストールを追加  
   
 以上  

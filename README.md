@@ -2081,29 +2081,83 @@ function getData() {
 cd C:\Users\shino\doc\cicddemo  
 rmdir /q /s devops-example-client  
 git commit -a -m "Delete devops"  
-git push
+git push  
 ```  
-
-クローンしてコピー
-```
-git clone https://github.com/yamamoto-febc/devops-example-client-skel devops-example-client  
-```
   
-非管理対象を追記
-```
-node_modules
-.swp
-```
-
-不要ファイルを削除
-```
+クローンしてコピー  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-client-skel devops-example-client  
+```  
+  
+非管理対象を追記  
+```  
+node_modules  
+.swp  
+```  
+  
+不要ファイルを削除  
+```  
 cd devops-example-client  
-rmdir /q /s .git
-```
-
-ステージングとコミット、プル
-git add devops-example-client/
-
+rmdir /q /s .git  
+```  
+  
+ステージングとコミット、プル  
+```  
+cd C:\Users\shino\doc\cicddemo  
+git add devops-example-client/  
+git commit -a -m "Add devops-example-client"  
+git push  
+```  
+  
+クライアント起動  
+```  
+npm install && npm start  
+```  
+  
+npmでのモジュールがGitで管理されていない事の確認  
+```  
+git staus  
+```  
+OK、これで何とかできそだね  
+  
+クライアントアプリの修正  
+```  
+const hostname = '<サーバのグローバルIPアドレス>'  
+const remote = require('electron').remote  
+  
+document.querySelector('#btn').addEventListener('click', getData);  
+  
+function getData() {  
+    const net = remote.net;  
+    const request = net.request({  
+        method: 'GET',  
+        protocol: 'http:',  
+        hostname: hostname,  
+        port: 80,  
+        path: '/example.php'  
+    })  
+  
+    request.on('response', (response) => {  
+        document.querySelector('#result').innerHTML  = ""  
+        response.on('data', (chunk) => {  
+            document.querySelector('#result').innerHTML += chunk  
+        })  
+    })  
+    request.on('error', (err) => {  
+        document.querySelector('#result').innerHTML = `ERROR: ${JSON.stringify(err)}`  
+    })  
+    request.end()  
+}  
+```  
+```  
+35.221.101.2  
+```  
+  
+  
+  
+  
+  
+  
 ファイヤウォールルールにモバイルグローバルIPを追加してアクセステスト  
 ```  
 49.239.66.40  

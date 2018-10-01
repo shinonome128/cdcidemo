@@ -2077,14 +2077,33 @@ function getData() {
 ```  
 ユーザ名が無くて、コミットできない  
 そもそも、他のリポジトリからクローンしたものが管理対象になているので、一度ローカルでリポジトリを作り直す  
+```  
+cd C:\Users\shino\doc\cicddemo  
+rmdir /q /s devops-example-client  
+git commit -a -m "Delete devops"  
+git push
+```  
+
+クローンしてコピー
 ```
-cd C:\Users\shino\doc\cicddemo
-rmdir /q /s devops-example-client
+git clone https://github.com/yamamoto-febc/devops-example-client-skel devops-example-client  
 ```
-
-
-
   
+非管理対象を追記
+```
+node_modules
+.swp
+```
+
+不要ファイルを削除
+```
+cd devops-example-client  
+rmdir /q /s .git
+```
+
+ステージングとコミット、プル
+git add devops-example-client/
+
 ファイヤウォールルールにモバイルグローバルIPを追加してアクセステスト  
 ```  
 49.239.66.40  

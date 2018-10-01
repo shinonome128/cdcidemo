@@ -2005,8 +2005,84 @@ curl http://35.221.101.2/example.php
 グローバルからアクセスできない、多分フィルタに引っかかっている  
 自宅グローバルで再度テストすること  
   
+スタートスクリプトにGit インストールを追加  
+```  
+yum install -y git  
+```  
+  
+リトライ  
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+アプリ展開  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-server  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+  
+サーバローカルのアクセステスト  
+```  
+curl http://10.30.0.2/example.php  
+curl http://localhost/example.php  
+```  
+  
+最後は壊す  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+## クライアントアプリの修正  
+  
+クライアント起動  
+```  
+npm install && npm start  
+```  
+  
+クライアントアプリの修正  
+```  
+const hostname = '<サーバのグローバルIPアドレス>'  
+const remote = require('electron').remote  
+  
+document.querySelector('#btn').addEventListener('click', getData);  
+  
+function getData() {  
+    const net = remote.net;  
+    const request = net.request({  
+        method: 'GET',  
+        protocol: 'http:',  
+        hostname: hostname,  
+        port: 80,  
+        path: '/example.php'  
+    })  
+  
+    request.on('response', (response) => {  
+        document.querySelector('#result').innerHTML  = ""  
+        response.on('data', (chunk) => {  
+            document.querySelector('#result').innerHTML += chunk  
+        })  
+    })  
+    request.on('error', (err) => {  
+        document.querySelector('#result').innerHTML = `ERROR: ${JSON.stringify(err)}`  
+    })  
+    request.end()  
+}  
+```  
+```  
+35.221.101.2  
+```  
+ユーザ名が無くて、コミットできない  
+そもそも、他のリポジトリからクローンしたものが管理対象になているので、一度ローカルでリポジトリを作り直す  
+  
 ここから再開  
   
-スタートスクリプトにGit インストールを追加  
+ファイヤウォールルールにモバイルグローバルIPを追加してアクセステスト  
+```  
+49.239.66.40  
+```  
   
 以上  

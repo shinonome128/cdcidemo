@@ -2121,6 +2121,7 @@ git staus
 OK、これで何とかできそだね  
   
 クライアントアプリの修正  
+renderer.js  
 ```  
 const hostname = '<サーバのグローバルIPアドレス>'  
 const remote = require('electron').remote  
@@ -2154,13 +2155,58 @@ function getData() {
 ```  
   
   
-  
-  
-  
-  
 ファイヤウォールルールにモバイルグローバルIPを追加してアクセステスト  
+gcp_firewall.tf  
 ```  
 49.239.66.40  
 ```  
+```  
+  source_ranges = ["116.220.197.54/32", "173.194.92.0/23", "49.239.66.40/32"]  
+```  
+  
+アクセステスト  
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+アプリ展開  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-server  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+SSHアクセスができても、スタートスクリプトが完了していないとgitコマンドでエラーがでる  
+1分ぐらいかかる・・・・  
+  
+サーバローカルのアクセステスト  
+```  
+curl http://10.30.0.2/example.php  
+curl http://localhost/example.php  
+```  
+  
+なんと、グローバルIP、エフェメラルIPが構築のたびにちがう・・・  
+クライアントアプリを修正  
+```  
+35.189.130.250  
+```  
+  
+クライアントアプリのアクセステスト  
+```  
+cd devops-example-client  
+npm install && npm start  
+```  
+OK、モーマンタイ！！  
+  
+最後は壊す  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+## TravisCIでデプロイの自動化  
+  
+ここから再開  
   
 以上  

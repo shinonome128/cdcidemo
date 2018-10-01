@@ -1974,6 +1974,7 @@ git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-exa
 cd devops-example-server  
 cp example.php /var/www/html/  
 ```  
+```  
 [shinonome128@development ~]$ git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-  
 server  
 -bash: git: command not found  

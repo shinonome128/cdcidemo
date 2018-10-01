@@ -40,6 +40,7 @@ systemctl enable httpd.service
 systemctl start httpd.service 
 firewall-cmd --add-service=http --permanent 
 firewall-cmd --reload 
+yum install -y git  
 EOT
 
   network_interface {

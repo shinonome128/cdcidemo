@@ -10,7 +10,7 @@
 // }
 
 // const hostname = '<サーバのグローバルIPアドレス>'  
-const hostname = '<35.221.101.2>'  
+const hostname = '35.221.101.2'  
 const remote = require('electron').remote  
   
 document.querySelector('#btn').addEventListener('click', getData);  

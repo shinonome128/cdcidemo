@@ -72,6 +72,12 @@ https://techblog.gmo-ap.jp/2017/11/16/terraform%E3%81%A7gcp%E7%92%B0%E5%A2%83%E3
 terraform インスタンス起動時のスタートアップシェルの改造方法、本家  
 https://www.terraform.io/docs/providers/google/r/compute_instance.html  
   
+cicd のサーバアプリのコード管理  
+https://github.com/shinonome128/devops-example-server  
+  
+travis ci 管理画面  
+https://travis-ci.org/profile/shinonome128  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -2207,6 +2213,103 @@ terraform destroy terraform
   
 ## TravisCIでデプロイの自動化  
   
-ここから再開  
+NOSグローバルIPをfirewall rule に追加  
+```  
+126.112.246.62  
+```  
+  
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+アプリ展開  
+```  
+git clone https://github.com/yamamoto-febc/devops-example-server-skel devops-example-server  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+  
+手動でGitHub上から管理変更用のサーバアプリのリポジトリ作成  
+```  
+devops-example-server  
+```  
+  
+サーバアプリ用のGitリポジトリを作成  
+```  
+git remote add origin https://github.com/shinonome128/devops-example-server.git  
+git push -u origin master  
+```  
+  
+TravisCIの管理画面からこのリポジトリとの連携をONに設定  
+GUI上から設定  
+  
+サーバアプリのルートディレクトリにtravis ci の設定ファイル作成  
+```  
+cd devops-example-server  
+vi .travis.yml  
+```  
+```  
+language: php  
+script:  
+- echo "Start CI"  
+deploy:  
+  provider: script  
+  script:  
+  - bash deploy.sh  
+  skip_cleanup: true  
+  on:  
+    branch: master  
+```  
+  
+ディプロイ用シェルを作成  
+```  
+cd devops-example-server  
+vi deploy.sh  
+```  
+```  
+#!/bin/sh  
+  
+chmod 0600 id_rsa  
+scp -q -o "StrictHostKeyChecking no" -i id_rsa *.php root@$REMOTE_HOST:/var/www/html/  
+  
+```  
+  
+travis インストール  
+```  
+sudo yum install -y ruby  
+sudo gem install travis -v 1.8.8 --no-rdoc --no-ri  
+```  
+```  
+Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out  
+[shinonome128@development devops-example-server]$ sudo gem install travis  
+Building native extensions.  This could take a while...  
+ERROR:  Error installing travis:  
+        ERROR: Failed to build gem native extension.  
+    /usr/bin/ruby extconf.rb  
+mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h  
+Gem files will remain installed in /usr/local/share/gems/gems/ffi-1.9.25 for inspection.  
+Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out  
+```  
+gem コマンドでインストールがコケル  
+  
+gem をアップデート  
+```  
+sudo gem update --system  
+```  
+  
+リトライ  
+```  
+sudo gem install travis -v 1.8.8 --no-rdoc --no-ri  
+```  
+  
+もー、なぜかtravis が動かん、やめだ、やめ！！  
+  
+  
+travis でログイン  
+```  
+travis login  
+```  
   
 以上  

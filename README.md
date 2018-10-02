@@ -78,6 +78,9 @@ https://github.com/shinonome128/devops-example-server
 travis ci 管理画面  
 https://travis-ci.org/profile/shinonome128  
   
+travis ci cli 本家、OS毎のインスト方法がある  
+https://github.com/travis-ci/travis.rb#ubuntu  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -2386,13 +2389,15 @@ Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out
 ```  
 開発ツールを先に入れろとな・・・  
   
-ここから再開  
-エラーメッセージについて調査する  
   
 作成環境の削除前チェックと削除  
 ```  
 terraform plan -destroy terraform  
 terraform destroy terraform  
 ```  
+  
+OSかえるところからアプローチ  
+ここから再開  
+エラーメッセージについて調査する  
   
 以上  

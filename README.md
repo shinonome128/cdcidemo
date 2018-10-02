@@ -2272,8 +2272,7 @@ vi deploy.sh
 #!/bin/sh  
   
 chmod 0600 id_rsa  
-scp -q -o "StrictHostKeyChecking no" -i id_rsa *.php root@$REMOTE_HOST:/var/www/html/  
-  
+scp -q -o "StrictHostKeyChecking no" -i id_rsa example.php root@$REMOTE_HOST:/var/www/html/  
 ```  
   
 travis インストール  
@@ -2285,8 +2284,8 @@ sudo gem install travis -v 1.8.8 --no-rdoc --no-ri
 Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out  
 [shinonome128@development devops-example-server]$ sudo gem install travis  
 Building native extensions.  This could take a while...  
-ERROR:  Error installing travis:  
-        ERROR: Failed to build gem native extension.  
+ERROR: Error installing travis:  
+ERROR: Failed to build gem native extension.  
     /usr/bin/ruby extconf.rb  
 mkmf.rb can't find header files for ruby at /usr/share/include/ruby.h  
 Gem files will remain installed in /usr/local/share/gems/gems/ffi-1.9.25 for inspection.  
@@ -2303,13 +2302,97 @@ sudo gem update --system
 ```  
 sudo gem install travis -v 1.8.8 --no-rdoc --no-ri  
 ```  
+だめ・・・  
   
-もー、なぜかtravis が動かん、やめだ、やめ！！  
+方針  
+エラーメッセージとtravis で調査  
+gem アップデートしてからインストール  
+apt-get が使えるOSにする(Debian にする)  
   
-  
-travis でログイン  
+エラーメッセージとtravis で調査  
+Ruby 環境が整理されていないらしい・・・  
+Fedra の場合は下記になるらしい  
 ```  
-travis login  
+$ sudo yum install ruby ruby-devel  
+```  
+  
+  
+再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+アプリ展開  
+```  
+git clone https://github.com/shinonome128/devops-example-server.git  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+  
+ruby と travis ci インスト  
+```  
+sudo yum install -y ruby ruby-devel  
+sudo gem install travis  
+```  
+```  
+[shinonome128@development ~]$ sudo gem install travis  
+Building native extensions.  This could take a while...  
+ERROR:  Error installing travis:  
+        ERROR: Failed to build gem native extension.  
+    /usr/bin/ruby extconf.rb  
+checking for ffi.h... *** extconf.rb failed ***  
+Could not create Makefile due to some reason, probably lack of necessary  
+libraries and/or headers.  Check the mkmf.log file for more details.  You may  
+need configuration options.  
+Provided configuration options:  
+        --with-opt-dir  
+        --without-opt-dir  
+        --with-opt-include  
+        --without-opt-include=${opt-dir}/include  
+        --with-opt-lib  
+        --without-opt-lib=${opt-dir}/lib64  
+        --with-make-prog  
+        --without-make-prog  
+        --srcdir=.  
+        --curdir  
+        --ruby=/usr/bin/ruby  
+        --with-ffi_c-dir  
+        --without-ffi_c-dir  
+        --with-ffi_c-include  
+        --without-ffi_c-include=${ffi_c-dir}/include  
+        --with-ffi_c-lib  
+        --without-ffi_c-lib=${ffi_c-dir}/  
+        --with-libffi-config  
+        --without-libffi-config  
+        --with-pkg-config  
+        --without-pkg-config  
+/usr/share/ruby/mkmf.rb:434:in `try_do': The compiler failed to generate an executable file. (RuntimeError)  
+You have to install development tools first.  
+        from /usr/share/ruby/mkmf.rb:565:in `try_cpp'  
+        from /usr/share/ruby/mkmf.rb:1038:in `block in have_header'  
+        from /usr/share/ruby/mkmf.rb:889:in `block in checking_for'  
+        from /usr/share/ruby/mkmf.rb:340:in `block (2 levels) in postpone'  
+        from /usr/share/ruby/mkmf.rb:310:in `open'  
+        from /usr/share/ruby/mkmf.rb:340:in `block in postpone'  
+        from /usr/share/ruby/mkmf.rb:310:in `open'  
+        from /usr/share/ruby/mkmf.rb:336:in `postpone'  
+        from /usr/share/ruby/mkmf.rb:888:in `checking_for'  
+        from /usr/share/ruby/mkmf.rb:1037:in `have_header'  
+        from extconf.rb:16:in `<main>'  
+Gem files will remain installed in /usr/local/share/gems/gems/ffi-1.9.25 for inspection.  
+Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out  
+[shinonome128@development ~]$  
+```  
+開発ツールを先に入れろとな・・・  
+  
+ここから再開  
+エラーメッセージについて調査する  
+  
+作成環境の削除前チェックと削除  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
 ```  
   
 以上  

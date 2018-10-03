@@ -81,6 +81,9 @@ https://travis-ci.org/profile/shinonome128
 travis ci cli 本家、OS毎のインスト方法がある  
 https://github.com/travis-ci/travis.rb#ubuntu  
   
+travis cli 、インストール時の問題、ruby, gcc, libffi-dev, make の依存関係を atp-get で解決しないと、gem が成功しない  
+https://github.com/travis-ci/travis.rb/issues/558  
+  
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -2388,6 +2391,7 @@ Results logged to /usr/local/share/gems/gems/ffi-1.9.25/ext/ffi_c/gem_make.out
 [shinonome128@development ~]$  
 ```  
 開発ツールを先に入れろとな・・・  
+Ruby のコードが出ないとつらそうなので、方針展開  
   
   
 作成環境の削除前チェックと削除  
@@ -2396,8 +2400,100 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
-OSかえるところからアプローチ  
-ここから再開  
-エラーメッセージについて調査する  
+## apt-get が使えるOSにする(Debian にする)  
+  
+やること  
+教則本でどのOSを使っているか再度確認  
+tfファイルの修正  
+OS変更  
+インフラ再構築  
+コマンドを拾う手動  
+スタートスクリプトで yum を使っているので修正  
+アプリケーション配置を追加  
+apt-get で travis cle をインストしてテスト  
+破棄  
+自動構築して再テスト  
+  
+教則本でどのOSを使っているか再度確認  
+```  
+  os_type            = "centos"  
+```  
+  
+あれ、Centos？？ apt-get は使ってる？  
+つかってない、yum で apache 入れてる。。  
+  
+OS変更  
+tfファイルの修正  
+debian は、、、GCP REST から取得  
+```  
+ "sourceImage": "projects/debian-cloud/global/images/debian-9-stretch-v20180911",  
+```  
+スタートスクリプト部分をコメントアウト、多分、 yum ないから。。  
+  
+インフラ再構築  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+コマンドを拾う手動  
+スタートスクリプトで yum を使っているので修正  
+yumの場合  
+```  
+yum update -y  
+yum install -y httpd php  
+systemctl enable httpd.service  
+systemctl start httpd.service  
+firewall-cmd --add-service=http --permanent  
+firewall-cmd --reload  
+yum install -y git  
+```  
+```  
+sudo apt-get update -y  
+sudo apt-get install -y apache2  
+sudo apt-get install -y php  
+sudo systemctl apache2 restart  
+sudo apt-get install -y git  
+```  
+  
+アプリケーション配置を追加  
+```  
+git clone https://github.com/shinonome128/devops-example-server.git  
+cd devops-example-server  
+sudo cp example.php /var/www/html/  
+```  
+  
+apt-get で travis cle をインストしてテスト  
+```  
+sudo apt-get install -y ruby ruby-dev  
+sudo apt-get install -y gcc  
+sudo apt-get install -y libffi-dev  
+sudo apt-get install -y make  
+sudo gem install travis  
+```  
+  
+travis の動作確認  
+```  
+travis version  
+```  
+```  
+shinonome128@development:~/devops-example-server$ travis version  
+1.8.9  
+```  
+うごいたー！  
+  
+  
+破棄  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+スタートシェルの修正  
+ここから再開、手動で売ったスクリプトを反映すること  
+  
+  
+自動構築して再テスト  
+  
   
 以上  

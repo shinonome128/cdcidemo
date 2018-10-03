@@ -16,7 +16,8 @@ resource "google_compute_instance" "development" {
   boot_disk {
     initialize_params {
       # image = "ubuntu-os-cloud/ubuntu-1404-lts"
-      image = "projects/centos-cloud/global/images/centos-7-v20180911"
+      # image = "projects/centos-cloud/global/images/centos-7-v20180911"
+      image = "projects/debian-cloud/global/images/debian-9-stretch-v20180911"
     }
   }
 
@@ -30,6 +31,7 @@ resource "google_compute_instance" "development" {
   scratch_disk {
   }
 
+/* temp invalid
   // app install
   metadata_startup_script = <<EOT
 #!/bin/sh 
@@ -42,6 +44,7 @@ firewall-cmd --add-service=http --permanent
 firewall-cmd --reload 
 yum install -y git  
 EOT
+*/
 
   network_interface {
     access_config {

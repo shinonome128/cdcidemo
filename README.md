@@ -2511,4 +2511,146 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
+## travis cli セットアップ  
+  
+ローカルサーバアプリのGit管理をクローンして初期セットアップ  
+```  
+mkdir C:\Users\shino\doc\devops-example-server  
+cd C:\Users\shino\doc\devops-example-server  
+git clone https://github.com/shinonome128/devops-example-server.git C:\Users\shino\doc\devops-example-server  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+echo *.swp >> .gitignore  
+git add *  
+git commit -m "Add ignore""  
+git push  
+```  
+  
+travis.cli 設定ファイルを作成  
+```  
+cd C:\Users\shino\doc\devops-example-server  
+echo hoge >> .travis.yml  
+```  
+```  
+language: php  
+script:  
+- echo "Start CI"  
+deploy:  
+  provider: script  
+  script:  
+  - bash deploy.sh  
+  skip_cleanup: true  
+  on:  
+    branch: master  
+```  
+  
+ディプロイ用スクリプトを作成  
+```  
+cd C:\Users\shino\doc\devops-example-server  
+echo hoge >> deploy.sh  
+```  
+```  
+#!/bin/sh  
+  
+chmod 0600 id_rsa  
+scp -q -o "StrictHostKeyChecking no" -i id_rsa *.php root@$REMOTE_HOST:/var/www/html/  
+```  
+  
+自動構築して再テスト  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+travis ci にログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+```  
+shinonome128@development:/devops-example-server$ travis login  
+We need your GitHub login to identify you.  
+This information will not be sent to Travis CI, only to api.github.com.  
+The password will not be displayed.  
+Try running with --github-token or --auto if you don't want to enter your password anyway.  
+Username: shinonome128@gmail.com  
+Password for shinonome128@gmail.com: *************  
+Successfully logged in as shinonome128!  
+shinonome128@development:/devops-example-server$  
+```  
+GitHub のクレデンシャルを求められるので入力  
+  
+ディプロイしたあとグローバルIPを暗号化  
+```  
+sudo travis encrypt REMOTE_HOST=35.200.69.130 -a  
+```  
+  
+暗号化した値を yml に保存  
+```  
+sudo travis encrypt-file hoge.secret -w id_rsa -a  
+```  
+あー、だめだ、秘密鍵を指定する必要があるみたい  
+  
+  
+破棄  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+tf ファイルを編集してディプロイ時に秘密鍵が生成されるようにする  
+サンプル、これをGCPで利用できるようにリバイズする  
+まずはそのままで・・・・  
+```  
+resource "null_resource" "store_private_key" {  
+  triggers {  
+    ssh_key_id = "${module.server.ssh_key_id}"  
+  }  
+  provisioner "local-exec" {  
+    command = "echo '${module.server.ssh_private_key}' > ${path.root}/id_rsa ; chmod 0600 ${path.root}/id_rsa"  
+  }  
+  provisioner "local-exec" {  
+    when    = "destroy"  
+    command = "rm -f ${path.root}/id_rsa"  
+  }  
+}  
+  
+output ipaddress {  
+  value = "${module.server.server_ipaddress}"  
+}  
+  
+output ssh_private_key {  
+  value = "${module.server.ssh_private_key}"  
+}  
+```  
+  
+文法チェック  
+```  
+terraform plan terraform  
+```  
+```  
+C:\Users\shino\doc\cicddemo>terraform plan terraform  
+Error: output 'ipaddress': unknown module referenced: server  
+Error: resource 'null_resource.store_private_key' provisioner local-exec (#1): unknown module referenced: server  
+Error: resource 'null_resource.store_private_key' config: unknown module referenced: server  
+Error: output 'ssh_private_key': unknown module referenced: server  
+Error: resource 'null_resource.store_private_key' config: reference to undefined module "server"  
+Error: output 'ipaddress': reference to undefined module "server"  
+Error: resource 'null_resource.store_private_key' provisioner local-exec (#1): reference to undefined module "server"  
+Error: output 'ssh_private_key': reference to undefined module "server"  
+```  
+うん、だよね・・・・、  
+  
+方針  
+GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
+コマンドラインで生成し、スタートスクリプトに反映する  
+  
+  
+GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
+ここから再開する  
+  
+  
+実施内容をコードに落とす  
+  
+  
 以上  

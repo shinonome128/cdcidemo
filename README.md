@@ -2490,9 +2490,25 @@ terraform destroy terraform
 ```  
   
 スタートシェルの修正  
-完了 
+完了  
   
 自動構築して再テスト  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+```  
+shinonome128@development:~$ ls -l /  
+drwxr-xr-x  3 root root  4096 Oct  4 04:08 devops-example-server  
+```  
+Git クローンがルート直下に作成されている  
+コンソールログ見ると、スタートアップスクリプト完了後に、ユーザアカントが作られているのが原因  
+サーバ、travis cli 動作に問題なさそうなので対処しない  
   
+破棄  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
   
 以上  

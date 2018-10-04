@@ -44,23 +44,23 @@ resource "google_compute_instance" "development" {
 # yum install -y git  
 
 # install base
-sudo apt-get update -y  
-sudo apt-get install -y apache2  
-sudo apt-get install -y php  
-sudo systemctl apache2 restart  
-sudo apt-get install -y git  
+apt-get update -y  
+apt-get install -y apache2  
+apt-get install -y php  
+systemctl apache2 restart  
+apt-get install -y git  
 
 # install server-app
 git clone https://github.com/shinonome128/devops-example-server.git  
 cd devops-example-server  
-sudo cp example.php /var/www/html/  
+cp example.php /var/www/html/  
 
 # install travics cli
-sudo apt-get install -y ruby ruby-dev  
-sudo apt-get install -y gcc  
-sudo apt-get install -y libffi-dev  
-sudo apt-get install -y make  
-sudo gem install travis  
+apt-get install -y ruby ruby-dev  
+apt-get install -y gcc  
+apt-get install -y libffi-dev  
+apt-get install -y make  
+gem install travis  
 
 EOT
 

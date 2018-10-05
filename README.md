@@ -2705,7 +2705,6 @@ C:\Users\shino\Desktop\identity
   
 teraterm で接続、問題なし  
   
-  
 破棄  
 ```  
 terraform destroy terraform  

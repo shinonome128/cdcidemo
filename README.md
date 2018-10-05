@@ -2647,13 +2647,72 @@ Error: output 'ssh_private_key': reference to undefined module "server"
 うん、だよね・・・・、  
   
 方針  
-GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
 コマンドラインで生成し、スタートスクリプトに反映する  
-  
-  
 GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
-ここから再開する  
   
-実施内容をコードに落とす  
+## コマンドラインで生成し、スタートスクリプトに反映する  
+  
+インフラ構築  
+```  
+terraform apply terraform  
+```  
+  
+キーペア作成(-C [USERNAME]を付けるとGCP側で自動でユーザーを追加してくれる)  
+パスフレーズは無し  
+```  
+ssh-keygen -t rsa -f ~/.ssh/my-ssh-key -C shinonome128  
+```  
+  
+権限を設定  
+```  
+chmod 400 ~/.ssh/my-ssh-key  
+```  
+  
+公開鍵を表示  
+コピーしておく  
+```  
+cat ~/.ssh/my-ssh-key.pub  
+```  
+  
+秘密鍵を表示  
+コピーしておく  
+  
+GCPメタデータ設定を実施  
+メタデータで公開鍵を削除するとアクセスできなくなる、ここを自動化する必要があるのかも  
+ブラウザ側でSSH鍵認証の設定  
+左ペインのメタデータをクリック  
+表示された画面でSSH認証鍵タブを選択  
+SSH鍵認証の追加  
+切り替わった画面で公開鍵をコピペ  
+  
+ローカルに作成  
+秘密鍵を張り付け  
+```  
+cd C:\Users\shino\Desktop  
+echo hoge >> identity  
+```  
+  
+GUIでTeraterm側でSSH鍵認証の設定  
+```  
+35.200.69.130  
+```  
+```  
+shinonome128  
+```  
+```  
+C:\Users\shino\Desktop\identity  
+```  
+  
+teraterm で接続、問題なし  
+  
+  
+破棄  
+```  
+terraform destroy terraform  
+```  
+  
+## GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
+  
+## 実施内容をコードに落とす  
   
 以上  

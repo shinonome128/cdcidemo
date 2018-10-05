@@ -84,6 +84,9 @@ https://github.com/travis-ci/travis.rb#ubuntu
 travis cli 、インストール時の問題、ruby, gcc, libffi-dev, make の依存関係を atp-get で解決しないと、gem が成功しない  
 https://github.com/travis-ci/travis.rb/issues/558  
   
+GCP でのSSH設定、いつも通り  
+https://qiita.com/rog-works/items/74402f09b5aecc73f823  
+  
 Terraform でGCPインスタンスにSSH鍵認証する方法  
 https://stackoverflow.com/questions/38645002/how-to-add-an-ssh-key-to-an-gcp-instance-using-terraform  
   
@@ -2652,8 +2655,6 @@ GCP用のSSH用鍵生成まで準備されたtfファイルを探す
 GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
 ここから再開する  
   
-  
 実施内容をコードに落とす  
-  
   
 以上  

@@ -2580,7 +2580,6 @@ This information will not be sent to Travis CI, only to api.github.com.
 The password will not be displayed.  
 Try running with --github-token or --auto if you don't want to enter your password anyway.  
 Username: shinonome128@gmail.com  
-Password for shinonome128@gmail.com: *************  
 Successfully logged in as shinonome128!  
 shinonome128@development:/devops-example-server$  
 ```  

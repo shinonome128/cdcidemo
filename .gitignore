@@ -1,5 +1,6 @@
 # cicddemo
 *.swp
+*.swo
 *.json
 .terraform/
 *.tfstate

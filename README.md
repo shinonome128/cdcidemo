@@ -2353,7 +2353,6 @@ Building native extensions.  This could take a while...
 ERROR:  Error installing travis:  
         ERROR: Failed to build gem native extension.  
     /usr/bin/ruby extconf.rb  
-checking for ffi.h... *** extconf.rb failed ***  
 Could not create Makefile due to some reason, probably lack of necessary  
 libraries and/or headers.  Check the mkmf.log file for more details.  You may  
 need configuration options.  
@@ -2711,6 +2710,86 @@ terraform destroy terraform
 ```  
   
 ## GCP用のSSH用鍵生成まで準備されたtfファイルを探す  
+  
+やること  
+GCP上であらかじめ秘密鍵と公開鍵を作成  
+秘密鍵ファイルはGitHub管理しないようにする  
+公開鍵ファイルもGitHub管理しないようにする  
+公開鍵をインつタンス作成のtfに絶対パスで指定  
+```  
+  metadata {  
+    sshKeys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"  
+  }  
+```  
+  
+## GCP上であらかじめ秘密鍵と公開鍵を作成  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+インスタンス上で鍵作成  
+```  
+ssh-keygen -t rsa -f ~/.ssh/identity -C shinonome128  
+```  
+  
+公開鍵を表示  
+出力をコピー  
+```  
+cat ~/.ssh/identity.pub  
+```  
+  
+秘密鍵を表示  
+出力をコピー  
+```  
+cat ~/.ssh/identity  
+```  
+  
+ローカルで公開鍵を作成  
+ファイルを開いてコピーした内容を張り付け  
+```  
+cd C:\Users\shino\doc\cicddemo  
+echo hoge >> identity.pub  
+```  
+  
+ローカルで秘密鍵を作成  
+ファイルを開いてコピーした内容を張り付け  
+```  
+cd C:\Users\shino\doc\cicddemo  
+echo hoge >> identity  
+```  
+  
+ディストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+## 秘密鍵ファイルはGitHub管理しないようにする  
+  
+ignore に下記を追記  
+```  
+cd C:\Users\shino\doc\cicddemo  
+echo identity>>.gitignore  
+```  
+  
+## 公開鍵ファイルもGitHub管理しないようにする  
+  
+ignore に下記を追記  
+```  
+cd C:\Users\shino\doc\cicddemo  
+echo identity.pub>>.gitignore  
+```  
+  
+## 公開鍵をインつタンス作成のtfに絶対パスで指定  
+  
+インタンス作成のtfファイルににユーザ名と公開鍵ファイル絶対パス指定  
+```  
+sshKeys = "shinonome128:${file(C:\Users\shino\doc\cicddemo\identity.pub)}"  
+```  
+  
   
 ## 実施内容をコードに落とす  
   

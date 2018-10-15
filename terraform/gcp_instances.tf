@@ -66,7 +66,8 @@ EOT
 
   // ssh-key
   metadata {  
-    sshKeys = "shinonome128:${file(C:\Users\shino\doc\cicddemo\identity.pub)}"  
+    # sshKeys = "shinonome128:${file(C:\Users\shino\doc\cicddemo\identity.pub)}"  
+    sshKeys = "shinonome128:${file(C:/Users/shino/doc/cicddemo/identity.pub)}"  
   }  
 
   network_interface {

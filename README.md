@@ -2856,9 +2856,40 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
-## 実施内容をコードに落とす  
+## インストール後のTravis CIの設定  
   
-えーと何やるんだっけ？たしかSSHがしたかったんではなく、SCPがTravis CI処理で必要だったからやってたはず・・  
-今までの流れと、今後やることを整理するところから開始する  
+サーバアプリの .gitignore ファイルに秘密鍵と公開鍵を追加する  
+```  
+cd C:\Users\shino\doc\devops-example-server  
+echo identity>>.gitignore  
+echo identity.pub>>.gitignore  
+```  
+  
+ここから再開予定  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+Travis CIログイン  
+```  
+travis login  
+```  
+  
+グローバルIPを暗号化して travis.yml に落とす  
+ディプロイが終わった後、GCPコンソールから拾う  
+```  
+travis encrypt REMOTE_HOST=<サーバのグローバルIPアドレス> -a  
+```  
+  
+SCPでローカルから秘密鍵をサーバにアップロードする  
+  
+秘密鍵を travis.yml に落とす  
+```  
+travis encrypt-file <秘密鍵ファイル> -w id_rsa -a  
+```  
+  
   
 以上  

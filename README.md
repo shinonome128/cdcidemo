@@ -2790,7 +2790,75 @@ echo identity.pub>>.gitignore
 sshKeys = "shinonome128:${file(C:\Users\shino\doc\cicddemo\identity.pub)}"  
 ```  
   
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+```  
+C:\Users\shino\doc\cicddemo>terraform plan terraform  
+Error: Error parsing terraform\gcp_instances.tf: At 69:64: illegal char escape  
+```  
+文法エラーが出てる  
+JSONファイル指定時の方法と比較  
+サンプルコードとの比較  
+  
+  
+JSONファイル指定時の方法と比較  
+```  
+    sshKeys = "shinonome128:${file(C:\Users\shino\doc\cicddemo\identity.pub)}"  
+```  
+```  
+  credentials = "${file("C:/Users/shino/doc/cicddemo/cicd-demo-707b32bf1a7f.json")}"  
+```  
+ああ、パスはUnix 表記でないと読み込まないらしい。。  
+修正完了  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+```  
+Error: Error loading terraform\gcp_instances.tf: Error reading config for google_compute_instance[development]: parse error at 1:22: expected ")" but found ":"  
+```  
+あー、ファイル名ダブルクゥートでかこまなくちゃね。。  
+修正完了  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+teraterm で接続確認  
+35.200.23.217  
+shinonome128  
+identity  
+問題なし、初期構築で秘密鍵の登録ができてアクセスも完了  
+  
+公開鍵が .ssh フォルダに登録されていることを確認  
+```  
+ls -la .ssh/  
+```  
+```  
+shinonome128@development:~$ ls -la .ssh/  
+total 12  
+drwx------ 2 shinonome128 shinonome128 4096 Oct 15 10:03 .  
+drwxr-xr-x 3 shinonome128 shinonome128 4096 Oct 15 10:07 ..  
+-rw------- 1 shinonome128 shinonome128  412 Oct 15 10:03 authorized_keys  
+```  
+この authorized_keys の中身を開くと、terraform 経由でメタデータに設定されてたSSH公開鍵と同じになる  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
   
 ## 実施内容をコードに落とす  
+  
+えーと何やるんだっけ？たしかSSHがしたかったんではなく、SCPがTravis CI処理で必要だったからやってたはず・・  
+今までの流れと、今後やることを整理するところから開始する  
   
 以上  

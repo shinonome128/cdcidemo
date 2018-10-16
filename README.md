@@ -2973,12 +2973,133 @@ git commit -m "Add travis config"
 git push  
 ```  
   
-ここから再開、  
+## 手順整理と問題点整理  
   
-スタートスクリプトの修正  
-下記を追加  
+ディプロイ  
 ```  
-chmod 777 /devops-example-server  
+terraform plan terraform  
+terraform apply terraform  
 ```  
+  
+devops-exaple-server ディレクトリへのアクセス権限を再帰的に追加  
+ここは自動化できる  
+```  
+sudo chmod 777 -R /devops-example-server  
+```  
+  
+travis ci にログイン  
+ここがコード管理できない  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+グローバルIPを暗号化して travis.yml に落とす  
+ここがコード管理できない  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.221.110.3 -a  
+```  
+  
+ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
+ここがコード管理できない  
+  
+秘密鍵を travis.yml に落とす  
+```  
+cd /devops-example-server/  
+travis encrypt-file ~/identity -w id_rsa -a  
+```  
+  
+identity.enc , .travis.yml をレポジトリにコミット、プッシュ  
+ここがコード管理できない  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+ディプロイ自動化の問題点  
+travis で ログインするときに、GitHubのクレデンシャルが必要  
+travis で グローバルIP を .travis.yml に落とし、コミット、プッシュする必要がある  
+travis で　秘密鍵を .travis.yml に落とし、コミット、プッシュする必要がある  
+travis 設定後、GitHubにプッシュする時にGitHub のクレデンシャルが必要  
+  
+対策  
+いいや、今回は無視、イシューに登録して拡張してゆく  
+  
+  
+## スタートスクリプトの修正  
+  
+サーバアプリインスト後の権限変更  
+完了  
+  
+## コード変更をリアルタイムでディプロイする  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+travis ci にログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+グローバルIPを暗号化して travis.yml に落とす  
+IPが変わる場合は、env 部分を一度全削除  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.200.5.159 -a  
+```  
+  
+ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
+  
+秘密鍵を travis.yml に落とす  
+```  
+cd /devops-example-server/  
+travis encrypt-file ~/identity -w id_rsa -a  
+```  
+  
+identity.enc , .travis.yml をレポジトリにコミット、プッシュ  
+ここがコード管理できない  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+コード変更  
+```  
+ここから再開  
+  
+```  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+## メモ作成  
+  
+## リードミー作成  
+  
+## イシュー作成  
   
 以上  

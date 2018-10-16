@@ -73,7 +73,7 @@ terraform インスタンス起動時のスタートアップシェルの改造�
 https://www.terraform.io/docs/providers/google/r/compute_instance.html  
   
 cicd のサーバアプリのコード管理  
-https://github.com/shinonome128/devops-example-server  
+://github.com/shinonome128/devops-example-server  
   
 travis ci 管理画面  
 https://travis-ci.org/profile/shinonome128  
@@ -2881,15 +2881,104 @@ travis login
 グローバルIPを暗号化して travis.yml に落とす  
 ディプロイが終わった後、GCPコンソールから拾う  
 ```  
-travis encrypt REMOTE_HOST=<サーバのグローバルIPアドレス> -a  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.221.110.3 -a  
+```  
+```  
+shinonome128@development:/devops-example-server$ travis encrypt REMOTE_HOST=35.221.110.3 -a  
+Detected repository as shinonome128/devops-example-server, is this correct? |yes| yes  
+error: could not lock config file .git/config: Permission denied  
+Permission denied @ rb_sysopen - /devops-example-server/.travis.yml  
+for a full error report, run travis report --org  
+```  
+アクセス権限がない  
+  
+devops-exaple-server ディレクトリへのアクセス権限を追加  
+```  
+sudo chmod 777 /devops-example-server  
 ```  
   
-SCPでローカルから秘密鍵をサーバにアップロードする  
+リトライ  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.221.110.3 -a  
+```  
+```  
+shinonome128@development:/devops-example-server$ travis encrypt REMOTE_HOST=35.221.110.3 -a  
+Detected repository as shinonome128/devops-example-server, is this correct? |yes| yes  
+error: could not lock config file .git/config: Permission denied  
+Permission denied @ rb_sysopen - /devops-example-server/.travis.yml  
+for a full error report, run travis report --org  
+```  
+あれ？？再帰的にパーミッションを変更する必要がある？  
+  
+devops-exaple-server ディレクトリへのアクセス権限を再帰的に追加  
+```  
+sudo chmod 777 -R /devops-example-server  
+```  
+  
+リトライ  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.221.110.3 -a  
+```  
+```  
+shinonome128@development:/devops-example-server$ cat .travis.yml  
+language: php  
+script:  
+- echo "Start CI"  
+deploy:  
+  provider: script  
+  script:  
+  - bash deploy.sh  
+  skip_cleanup: true  
+  on:  
+    branch: master  
+env:  
+  global:  
+    secure: SW3PB1PIpfnrpWpGO2vrtZgZQ+Be24bW7qOFSxjhN9Tn/mjfNn4wSz/mNDI2bjTSOO8lqMDlJEeIZ4muWTki/JVVXOTbgFWvRRH7zFdPqYYwxKWVhad43QQh0VDcDnIjvZqHrcr+t/gwDC7nH3BSqm0KhobO77+Xx2FDMwvQEYLNN0GLAfTsbTMMrw1OOc/RmK4R4nN2dUtOliP0rrzx0iLgfhmFK  
+X5p4D6XJhYs0s2sATiMvL+ot27MqK6tiLvYPhlTPaLFCorjE0Sp9NBODJhsuz0yEnPIw0vCoPy6N8x2jLCkSKoKVvChvJK+jHsyqFhJW4z2M1OQWZnqyi6+Hh3FAv22HP7gEeCdoE5m4t6wbIgAw1PcazBMvbh+oZsbWYkdthzqm5R5wWv7QKo1nXxa83pnSLgAgSs2W/eaDgHPUBDIsH7W6LEH5ldy3BWBtKaN03  
+yuU4PSHR32Bov52Tz3/AsSZ6CydeDDYPFw+LH06weZ/dOca7nQy3Ra+hwQyIw8eLHAUoj9i1BztvRlXeSM0kCsLesY1zo2QJyj8yn0kqdCakM1YNhcuaXuhM/t0TwMvdRzjiMEw8GnZ8MCNEBvVElU6Ay8diod3lBmdx17emVTFyJmyPtPL0/2gMXv2JMAs7VwsPlL+qoEtenvHjteoPOVdUVNYdvPMWxiFNY=  
+shinonome128@development:/devops-example-server$  
+```  
+IPアドレスが暗号化された global 変数が追加される  
+  
+ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
   
 秘密鍵を travis.yml に落とす  
 ```  
-travis encrypt-file <秘密鍵ファイル> -w id_rsa -a  
+cd /devops-example-server/  
+travis encrypt-file ~/identity -w id_rsa -a  
+```  
+```  
+shinonome128@development:/devops-example-server$ travis encrypt-file ~/identity -w id_rsa -a  
+encrypting /home/shinonome128/identity for shinonome128/devops-example-server  
+storing result as identity.enc  
+storing secure env variables for decryption  
+Make sure to add identity.enc to the git repository.  
+Make sure not to add /home/shinonome128/identity to the git repository.  
+Commit all changes to your .travis.yml.  
+```  
+identity.enc と .travis.yml をレポジトリにコミットするように指示される  
+  
+  
+identity.enc , .travis.yml をレポジトリにコミット、プッシュ  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
 ```  
   
+ここから再開、  
+  
+スタートスクリプトの修正  
+下記を追加  
+```  
+chmod 777 /devops-example-server  
+```  
   
 以上  

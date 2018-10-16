@@ -8,8 +8,11 @@ CICD環境の構築
   
 ## 参考  
   
-ドキュメント・コード管理  
+ドキュメント・コード  
 https://github.com/shinonome128/cicddemo  
+  
+cicd のサーバアプリのコード  
+https://github.com/shinonome128/devops-example-server  
   
 山本和道さんの道場、ハンズオン形式でわかりやすい、全11回  
 https://knowledge.sakura.ad.jp/author/kazumichi_yamamoto/  
@@ -71,9 +74,6 @@ https://techblog.gmo-ap.jp/2017/11/16/terraform%E3%81%A7gcp%E7%92%B0%E5%A2%83%E3
   
 terraform インスタンス起動時のスタートアップシェルの改造方法、本家  
 https://www.terraform.io/docs/providers/google/r/compute_instance.html  
-  
-cicd のサーバアプリのコード管理  
-://github.com/shinonome128/devops-example-server  
   
 travis ci 管理画面  
 https://travis-ci.org/profile/shinonome128  
@@ -3003,8 +3003,10 @@ travis encrypt REMOTE_HOST=35.221.110.3 -a
   
 ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
 ここがコード管理できない  
+初回のみ、travis.yml と identity.enc が生成されれば二回目以降は不要  
   
 秘密鍵を travis.yml に落とす  
+初回のみ、travis.yml と identity.enc が生成されれば二回目以降は不要  
 ```  
 cd /devops-example-server/  
 travis encrypt-file ~/identity -w id_rsa -a  
@@ -3031,7 +3033,6 @@ terraform destroy terraform
 ディプロイ自動化の問題点  
 travis で ログインするときに、GitHubのクレデンシャルが必要  
 travis で グローバルIP を .travis.yml に落とし、コミット、プッシュする必要がある  
-travis で　秘密鍵を .travis.yml に落とし、コミット、プッシュする必要がある  
 travis 設定後、GitHubにプッシュする時にGitHub のクレデンシャルが必要  
   
 対策  
@@ -3064,14 +3065,6 @@ cd /devops-example-server/
 travis encrypt REMOTE_HOST=35.200.5.159 -a  
 ```  
   
-ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
-  
-秘密鍵を travis.yml に落とす  
-```  
-cd /devops-example-server/  
-travis encrypt-file ~/identity -w id_rsa -a  
-```  
-  
 identity.enc , .travis.yml をレポジトリにコミット、プッシュ  
 ここがコード管理できない  
 ```  
@@ -3084,17 +3077,82 @@ git commit -m "Add travis config"
 git push  
 ```  
   
-コード変更  
+ローカルでサーバアプリのコード変更 、コミット、プッシュ  
+example.php  
 ```  
-ここから再開  
+      'msg' => "Updated"  // この行を追加  
+```  
   
+クライアントアプリのグローバルIP変更  
+render.js  
 ```  
+const hostname = '35.200.5.159'  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+だめ、メッセージが変わっていない、  
+多分、Travis CI からのSSHアクセスが失敗してるんだと思われる、Git の Webhook ログを確認する  
+  
+  
+GitHub Webhook ログ  
+とくなし、とゆーか、正直よくわからん  
+  
+Travis CI ログ  
+```  
+Deploying application  
+deploy.sh: line 2: $'\r': command not found  
+chmod: cannot access ‘id_rsa\r’: No such file or directory  
+lost connection  
+Script failed with status 1  
+```  
+あー、deploy.sh が正しく動作していない  
+  
+コマンド内の秘密鍵ファイル名を修正  
+id_rsa を identity にする  
+```  
+Deploying application  
+deploy.sh: line 2: $'\r': command not found  
+chmod: cannot access ‘identity\r’: No such file or directory  
+Warning: Identity file identity not accessible: No such file or directory.  
+lost connection  
+Script failed with status 1  
+failed to deploy  
+```  
+やっぱりだめ。。  
+  
+きちんと秘密鍵を配置してみる  
+ブラウザ経由SCPでローカルから秘密鍵をサーバにアップロードする  
+ここがコード管理できない  
+初回のみ、travis.yml と identity.enc が生成されれば二回目以降は不要  
+  
+秘密鍵を travis.yml に落とす  
+初回のみ、travis.yml と identity.enc が生成されれば二回目以降は不要  
+```  
+cd /devops-example-server/  
+mv ~/identity /devops-example-server/  
+travis encrypt-file ~/identity -w identity -a  
+```  
+  
+deploy.sh が動作しているので、単純に最新の example.php を置き換えるようにしてみる  
+全然わからん、一度解体してもう一度積み上げる  
+  
   
 デストロイ  
 ```  
 terraform plan -destroy terraform  
 terraform destroy terraform  
 ```  
+  
+## アプリケーション変更時のディプロイ管理  
+  
+全然わからん、一度解体してもう一度積み上げる  
+deploy.shがローカルで動くようにする  
+秘密鍵も手順撮りにやる  
+.travis.ymlも手順通りにやる  
   
 ## メモ作成  
   

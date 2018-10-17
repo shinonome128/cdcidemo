@@ -14,6 +14,9 @@ https://github.com/shinonome128/cicddemo
 cicd のサーバアプリのコード  
 https://github.com/shinonome128/devops-example-server  
   
+travis ci サーバアプリのディプロイのステータス確認  
+https://travis-ci.org/shinonome128/devops-example-server  
+  
 山本和道さんの道場、ハンズオン形式でわかりやすい、全11回  
 https://knowledge.sakura.ad.jp/author/kazumichi_yamamoto/  
   
@@ -3147,17 +3150,114 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
-## アプリケーション変更時のディプロイ管理  
+## アプリケーション変更時のディプロイ管理、リトライ  
   
-全然わからん、一度解体してもう一度積み上げる  
-deploy.shがローカルで動くようにする  
-秘密鍵も手順撮りにやる  
-.travis.ymlも手順通りにやる  
+サーバアプリで不要なアプリファイルを削除し、push  
+完了  
+  
+サーバアプリを綺麗な状態にする  
+完了  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+サーバアプリをGitにプッシュ  
+terraform で構築するので省略可能  
+  
+サーバアプリのディレクトリに .travis.yml を作成  
+初期設定で完了  
+  
+ディプロイ用スクリプト deploy.sh を作成  
+masterブランチの変更を検知すると、scpコマンドを用いて拡張子が.phpのファイルをサーバにアップロード  
+この動作を変更する  
+今回は、CI サーバと Webサーバが同一なので、Git でレポジトリを取得を取得後、php ファイルを Web サーバのディレクトリに移動  
+  
+scp時に利用する宛先グローバルIPアドレスや秘密鍵の指定  
+scpしないので不要  
+  
+TravisCIのCLIをインストール  
+terraformに組み込んだので対応不要  
+  
+travis ログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+宛先グローバルIPアドレスを暗号化  
+.travis.ymlファイルに暗号化した内容が追記され環境変数として参照可能  
+不要  
+  
+秘密鍵を暗号化  
+.travis.ymlファイルのポインタと暗号化されたファイルとして利用可能  
+秘密鍵はファイルのまま扱いたいのでencrypt_fileサブコマンドを利用  
+不要  
+  
+.travis.ymlファイルをコミットし、GitHubへpush  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+クライアントアプリのグローバルIP変更  
+render.js  
+```  
+const hostname = '35.200.5.159'  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+ローカルでPullしてから、サーバアプリのexample.phpのコード変更 、コミット、プッシュ  
+example.php  
+```  
+      'msg' => "Updated"  // この行を追加  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+変化なし、、、  
+Travis CI のログを参照する  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+Travis CI のログを参照する  
+```  
+Deploying application  
+cp: cannot create regular file ‘/var/www/html/’: No such file or directory  
+Script failed with status 1  
+failed to deploy  
+```  
+deploy.sh で cp コマンドが失敗している  
+  
+次回はここから再開  
+一度、ディプロイしたら、シェル単体で動作するか確認する  
+他に、サーバ上でコードを変更してみる  
   
 ## メモ作成  
   
 ## リードミー作成  
   
 ## イシュー作成  
+  
+.travis.yml を使えば、環境変数、ファイルを暗号化した状態で使えそう  
   
 以上  

@@ -3248,9 +3248,173 @@ failed to deploy
 ```  
 deploy.sh で cp コマンドが失敗している  
   
-次回はここから再開  
 一度、ディプロイしたら、シェル単体で動作するか確認する  
 他に、サーバ上でコードを変更してみる  
+  
+## アプリケーション変更時のディプロイ管理、リトライ  
+  
+今回のリトライで切り分ける内容  
+一度、ディプロイしたら、シェル単体で動作するか確認する  
+他に、サーバ上でコードを変更してみる  
+  
+サーバアプリを綺麗な状態にする  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+一度、ディプロイしたら、シェル単体で動作するか確認する  
+```  
+cd /devops-example-server  
+./deploy.sh  
+```  
+問題なく動作する  
+  
+travis ログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+.travis.ymlファイルをコミットし、GitHubへpush  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+クライアントアプリのグローバルIP変更  
+render.js  
+```  
+const hostname = '35.200.5.159'  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+サーバアプリのexample.phpのコード変更 、コミット、プッシュ  
+example.php  
+```  
+      'msg' => "Updated"  // この行を追加  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+やっぱり駄目だね  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+Travis CIログ  
+```  
+Deploying application  
+cp: cannot create regular file ‘/var/www/html/’: No such file or directory  
+Script failed with status 1  
+failed to deploy  
+```  
+アパッチのルートディレクトリが無いと言っている  
+  
+対策  
+単体でdeploy.shが動作していることとログ内容からCI動作はTravisCI上のVMで実行されている  
+もともとはSCP動作だったの Travis CI VM からのSCPが失敗していると思われる  
+次回は秘密鍵、 SCP コマンドが成功するように作成する  
+  
+## アプリケーション変更時のディプロイ管理、リトライ  
+  
+ここから再開、やっぱり Travis CI VM上でCI動作が行われているのでその検証が必要  
+  
+やること  
+単体でdeploy.shが動作していることとログ内容からCI動作はTravisCI上のVMで実行されている  
+もともとはSCP動作だったの Travis CI VM からのSCPが失敗していると思われる  
+deploy.sh で、秘密鍵、 SCP コマンドが成功するように作成する  
+firewall のルールを一度解除する  
+  
+サーバアプリを綺麗な状態にする  
+対象ファイルは　.travis.yml  
+  
+firewall のルールを一度解除する  
+全許可  
+  
+ディプロイ用スクリプト deploy.sh を修正  
+masterブランチの変更を検知すると、scpコマンドを用いて拡張子が.phpのファイルをサーバにアップロード  
+chmod は不要  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+travis ログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+宛先グローバルIPアドレスを暗号化  
+.travis.ymlファイルに暗号化した内容が追記され環境変数として参照可能  
+  
+秘密鍵を暗号化  
+.travis.ymlファイルのポインタと暗号化されたファイルとして利用可能  
+秘密鍵はファイルのまま扱いたいのでencrypt_fileサブコマンドを利用  
+  
+.travis.ymlファイルをコミットし、GitHubへpush  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+クライアントアプリのグローバルIP変更  
+render.js  
+```  
+const hostname = '35.200.5.159'  // ここの部分を変更する  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+ローカルでPullしてから、サーバアプリのexample.phpのコード変更 、コミット、プッシュ  
+example.php  
+```  
+      'msg' => "Updated"  // この行を追加したり、コメントアウトしたりする  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+  
   
 ## メモ作成  
   

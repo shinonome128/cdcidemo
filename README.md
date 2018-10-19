@@ -3344,15 +3344,11 @@ failed to deploy
 deploy.sh で、秘密鍵、 SCP コマンドが成功するように作成する  
 firewall のルールを一度解除する  
   
-サーバアプリを綺麗な状態にする  
+Travis CI 設定ファイルを綺麗にする  
 対象ファイルは　.travis.yml  
   
 firewall のルールを一度解除する  
 全許可  
-  
-ディプロイ用スクリプト deploy.sh を修正  
-masterブランチの変更を検知すると、scpコマンドを用いて拡張子が.phpのファイルをサーバにアップロード  
-chmod は不要  
   
 ディプロイ  
 ```  
@@ -3366,12 +3362,31 @@ cd /devops-example-server
 travis login  
 ```  
   
+ブラウザでサーバに秘密鍵をアップロードし、サーバアプリのルートディレクトリに移動  
+```  
+mv ~/identity /devops-example-server/  
+```  
+  
+ディプロイ用スクリプト deploy.sh を修正  
+masterブランチの変更を検知すると、scpコマンドを用いて拡張子が.phpのファイルをサーバにアップロード  
+chmod は不要  
+アクセス時のユーザアカントを変更  
+これ、事前でOKだったかも  
+  
 宛先グローバルIPアドレスを暗号化  
 .travis.ymlファイルに暗号化した内容が追記され環境変数として参照可能  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.221.80.249 -a  
+```  
   
 秘密鍵を暗号化  
 .travis.ymlファイルのポインタと暗号化されたファイルとして利用可能  
 秘密鍵はファイルのまま扱いたいのでencrypt_fileサブコマンドを利用  
+```  
+cd /devops-example-server/  
+travis encrypt-file identity -w identity -a  
+```  
   
 .travis.ymlファイルをコミットし、GitHubへpush  
 ```  
@@ -3407,6 +3422,7 @@ example.php
 cd C:\Users\shino\doc\cicddemo\devops-example-client  
 npm install && npm start  
 ```  
+失敗  
   
 デストロイ  
 ```  
@@ -3414,7 +3430,17 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
-  
+Travis CI のログ  
+```  
+Deploying application  
+lost connection  
+Script failed with status 1  
+```  
+おそらく SCP が失敗している  
+shinonome128 でログイン SCP をやっていて、 /var/www/html 配下に php ファイルを置こうとしている  
+一度、deploy.sh のSCP のディレクトリ変更してみる  
+次回ここから再開、これが上手くいけば、  
+構築時に /var/www/html の権限変や、root 権限で鍵の作成を実行すればよい  
   
 ## メモ作成  
   

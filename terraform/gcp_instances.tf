@@ -55,6 +55,7 @@ git clone https://github.com/shinonome128/devops-example-server.git
 cd devops-example-server  
 cp example.php /var/www/html/  
 chmod 777 -R /devops-example-server  
+chmod 777 -R /var/www/html
 
 # install travics cli
 apt-get install -y ruby ruby-dev  

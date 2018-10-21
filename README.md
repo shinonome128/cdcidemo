@@ -1,3 +1,4 @@
+
 # cicddemo  
   
 ## 目的  
@@ -3441,6 +3442,134 @@ shinonome128 でログイン SCP をやっていて、 /var/www/html 配下に p
 一度、deploy.sh のSCP のディレクトリ変更してみる  
 次回ここから再開、これが上手くいけば、  
 構築時に /var/www/html の権限変や、root 権限で鍵の作成を実行すればよい  
+  
+## アプリケーション変更時のディプロイ管理、リトライ  
+  
+shinonome128 でログイン SCP をやっていて、 /var/www/html 配下に php ファイルを置こうとしている  
+一度、deploy.sh のSCP のディレクトリ変更してみる  
+構築時に /var/www/html の権限変や、root 権限で鍵の作成を実行すればよい  
+  
+Terraform の instans 構築時に、スタートスクリプトで/var/www/html に権限を付与する  
+```  
+chmod 777 -R /var/www/html  
+```  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+travis ログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+Travis CI 設定ファイルを綺麗にする  
+対象ファイルは　.travis.yml  
+  
+宛先グローバルIPアドレスを暗号化  
+.travis.ymlファイルに暗号化した内容が追記され環境変数として参照可能  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.200.36.65 -a  
+```  
+  
+.travis.ymlファイルをコミットし、GitHubへpush  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+クライアントアプリのグローバルIP変更  
+render.js  
+```  
+const hostname = '35.200.36.65'  // ここの部分を変更する  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+ローカルでPullしてから、サーバアプリのexample.phpのコード変更 、コミット、プッシュ  
+example.php  
+```  
+      'msg' => "Updated"  // この行を追加したり、コメントアウトしたりする  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+かわらん・・・  
+  
+デストロイ  
+```  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
+Trabis CI ログを確認  
+```  
+Deploying application  
+lost connection  
+Script failed with status 1  
+```  
+やっぱり失敗してる・・、いちど、SCPができるかどうかを確認する  
+  
+秘密鍵をアップロードしSCPができるか確認  
+```  
+mv ~/identity /devops-example-server/  
+cd /devops-example-server/  
+scp -q -o "StrictHostKeyChecking no" -i identity *.php shinonome128@35.200.36.65:/var/www/html/  
+```  
+```  
+shinonome128@development:/devops-example-server$ scp -q -o "StrictHostKeyChecking no" -i identity *.php shinonome128@35.200.36.65:/var/www/html/  
+lost connection  
+```  
+あー、同じエラーが出ているのでコマンドラインが間違っていると思われる  
+  
+エラーメッセージを検索、  
+  
+普通にSSHを実行  
+```  
+ssh -i identity shinonome128@35.200.36.65  
+```  
+```  
+shinonome128@development:/devops-example-server$ ssh -i identity shinonome128@35.200.36.65  
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
+@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @  
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  
+Permissions 0644 for 'identity' are too open.  
+It is required that your private key files are NOT accessible by others.  
+This private key will be ignored.  
+Load key "identity": bad permissions  
+Permission denied (publickey).  
+```  
+chmod やれと怒られる  
+  
+chmod やって、 SSH 成功と SCP のロストコネクションが解消されるか確認  
+```  
+cd /devops-example-server/  
+sudo chmod 0600 identity  
+ssh -i identity shinonome128@35.200.36.65  
+scp -q -o "StrictHostKeyChecking no" -i identity *.php shinonome128@35.200.36.65:/var/www/html/  
+*.  
+```  
+解消した・・・・、まじかー  
+  
+結論  
+deploy.sh で秘密鍵の権限変更をしないと、SCPが失敗する  
+次回は deploy.sh にこれを盛り込んディプロイテストする  
   
 ## メモ作成  
   

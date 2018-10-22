@@ -1,4 +1,4 @@
-
+  
 # cicddemo  
   
 ## 目的  
@@ -3571,12 +3571,97 @@ scp -q -o "StrictHostKeyChecking no" -i identity *.php shinonome128@35.200.36.65
 deploy.sh で秘密鍵の権限変更をしないと、SCPが失敗する  
 次回は deploy.sh にこれを盛り込んディプロイテストする  
   
+## アプリケーション変更時のディプロイ管理、リトライ  
+  
+やること  
+deploy.sh で秘密鍵の権限変更をしないと、SCPが失敗する  
+次回は deploy.sh にこれを盛り込んディプロイテストする  
+  
+deploy.sh で SCP 前に権限変更するように修正  
+完了  
+  
+Travis CI 設定ファイルを綺麗にする  
+対象ファイルは　.travis.yml  これをロールバックする  
+完了、ロールバックは使わなかった、次回、 test start までロールバックする  
+  
+ディプロイ  
+```  
+terraform plan terraform  
+terraform apply terraform  
+```  
+  
+travis ログイン  
+```  
+cd /devops-example-server  
+travis login  
+```  
+  
+宛先グローバルIPアドレスを暗号化  
+.travis.ymlファイルに暗号化した内容が追記され環境変数として参照可能  
+```  
+cd /devops-example-server/  
+travis encrypt REMOTE_HOST=35.200.27.47 -a  
+```  
+  
+.travis.ymlファイルをコミットし、GitHubへpush  
+```  
+git add *  
+git add .gitignore  
+git add .travis.yml  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add travis config"  
+git push  
+```  
+  
+クライアントアプリのグローバルIP変更  
+render.js  
+```  
+const hostname = '35.200.36.65'  // ここの部分を変更する  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+ローカルでPullしてから、サーバアプリのexample.phpのコード変更 、コミット、プッシュ  
+example.php  
+```  
+      'msg' => "Updated"  // この行を追加したり、コメントアウトしたりする  
+```  
+  
+クライアントアプリの起動、アクセステスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+あれー？うまくいとらん。。とりあえず Travis のログ見る  
+Travis CI は成功してる、30秒以上かかるらしい・・・  
+もう一度、クライアントアプリ起動する、あー、成功！！！  
+  
+デストロイ  
+```  
+cd C:\Users\shino\doc\cicddemo  
+terraform plan -destroy terraform  
+terraform destroy terraform  
+```  
+  
 ## メモ作成  
+  
+次回はここから再開、次回再開時に再利用できるように整理して、このセクションは終わらせる  
   
 ## リードミー作成  
   
 ## イシュー作成  
   
+クライアントアプリーションのレポジトリを作り手順には反映する  
+firewall rule で Travis CI のグローバルアドレスで絞りたい  
+Terraform のスタートスクリプトでサーバアプリをインストするとルートユーザになってしまう、shinonome128ユーザにしたい  
+travis login 時の GitHub クレデンシャルの入力を求められるので自動化したい  
+エフェメラル IP を .travis.yml に落とす時に GCP コンソールからアドレスを拾う作業を自動化したい  
+.travis.yml を GibHub にプッシュする時に GitHub のクレデンシャルを求められるで自動化したい  
 .travis.yml を使えば、環境変数、ファイルを暗号化した状態で使えそう  
   
 以上  

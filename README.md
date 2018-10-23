@@ -3648,9 +3648,67 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
+  
+## クライアントアプリーションのレポジトリを作り手順には反映する  
+  
+ここから再開、実際にオペレーションする  
+  
+目的  
+コード管理をなるべく簡単にする  
+Git で分割したほうが再利用しやすい  
+  
+やること  
+クライアントのディレクトリ作成、コピー  
+GitHubレポジトリの作成  
+レポジトリへの移動  
+リードミーの編集  
+  
+クライアントのディレクトリ作成、コピー  
+```  
+mkdir C:\Users\shino\doc\devops-example-client  
+copy C:\Users\shino\doc\cicddemo\devops-example-client\* C:\Users\shino\doc\devops-example-client\  
+```  
+  
+GitHubレポジトリの作成  
+```  
+devops-example-client  
+```  
+  
+レポジトリへ登録  
+```  
+cd C:\Users\shino\doc\devops-example-client  
+git init  
+git add .gitignore  
+git config --local user.email shinonome128@gmail.com  
+git config --local user.name "shinonome128"  
+git commit -m "Add first commit"  
+git remote add origin https://github.com/shinonome128/evops-example-client.git  
+git push -u origin master  
+```  
+  
+Gitアクセステスト  
+render.js  
+適当に変更して GitHub に反映されることを確認  
+```  
+const hostname = '35.200.36.65'  // ここの部分を変更する  
+```  
+  
+アプリケーション起動テスト  
+```  
+cd C:\Users\shino\doc\cicddemo\devops-example-client  
+npm install && npm start  
+```  
+  
+リードミーの編集  
+目的  
+参照先  
+事前準備  
+起動方法  
+  
 ## メモ作成  
   
 次回はここから再開、次回再開時に再利用できるように整理して、このセクションは終わらせる  
+クライアントアプリの移動は簡単そうだから先に実行する  
   
 ## リードミー作成  
   

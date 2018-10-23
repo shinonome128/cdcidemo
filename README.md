@@ -93,7 +93,10 @@ https://qiita.com/rog-works/items/74402f09b5aecc73f823
   
 Terraform でGCPインスタンスにSSH鍵認証する方法  
 https://stackoverflow.com/questions/38645002/how-to-add-an-ssh-key-to-an-gcp-instance-using-terraform  
-  
+
+クライアントアプリ、コード管理、新規管理場所
+https://github.com/shinonome128/devops-example-client
+
 ## やること  
   
 最低限動くクライアント側アプリ開発  
@@ -3682,15 +3685,18 @@ git add .gitignore
 git config --local user.email shinonome128@gmail.com  
 git config --local user.name "shinonome128"  
 git commit -m "Add first commit"  
-git remote add origin https://github.com/shinonome128/evops-example-client.git  
+git remote add origin https://github.com/shinonome128/devops-example-client.git 
 git push -u origin master  
 ```  
-  
+
 Gitアクセステスト  
 render.js  
 適当に変更して GitHub に反映されることを確認  
 ```  
-const hostname = '35.200.36.65'  // ここの部分を変更する  
+cd C:\Users\shino\doc\devops-example-client  
+git add *
+git commit -m "Add codes"
+git push -u origin master  
 ```  
   
 アプリケーション起動テスト  
@@ -3699,7 +3705,10 @@ cd C:\Users\shino\doc\cicddemo\devops-example-client
 npm install && npm start  
 ```  
   
-リードミーの編集  
+## リードミーの編集  
+
+ここから再開
+
 目的  
 参照先  
 事前準備  

@@ -3719,20 +3719,22 @@ git commit -a -m "Delete devops"
 git push  
 ```
 
-お手本と管理サイトを比較して不要ファイルを整理
+クライアントアプリのお手本と管理レポジトリを比較して不要ファイルを整理
 ```
+node_modules
 ```
+ないね、node_modules ディレクトリだけ追記すればよい
 
-不良ファイルを .gitignore に登録
+非管理ファイルを .gitignore に登録
 ```
+node_modules
 ```
+もう、追加されてた
 
 不要ファイル一度削除してレポジトリと同期
 ```  
 cd C:\Users\shino\doc\devops-example-client  
-delete 不要ファイル
-git add *  
-git commit -m "Delete files"  
+git commit -a -m "Delete files"  
 git push
 ```  
 
@@ -3744,8 +3746,6 @@ npm install && npm start
 
 ## リードミーの編集  
   
-ここから再開  
-  
 目的  
 参照先  
 事前準備  
@@ -3753,14 +3753,20 @@ npm install && npm start
   
 ## メモ作成  
   
-次回はここから再開、次回再開時に再利用できるように整理して、このセクションは終わらせる  
-クライアントアプリの移動は簡単そうだから先に実行する  
-  
+既存のREAD.md の名前の変更
+```
+cd C:\Users\shino\doc\cicddemo  
+copy READ.md memo.md
+git commit -a -m "Add memo"  
+git push
+```
+
+今後は memo.md を開いて編集してゆく
+
 ## リードミー作成  
   
 ## イシュー作成  
   
-クライアントアプリーションのレポジトリを作り手順には反映する  
 firewall rule で Travis CI のグローバルアドレスで絞りたい  
 Terraform のスタートスクリプトでサーバアプリをインストするとルートユーザになってしまう、shinonome128ユーザにしたい  
 travis login 時の GitHub クレデンシャルの入力を求められるので自動化したい  

@@ -3756,8 +3756,9 @@ npm install && npm start
 既存のREAD.md の名前の変更
 ```
 cd C:\Users\shino\doc\cicddemo  
-copy READ.md memo.md
-git commit -a -m "Add memo"  
+copy README.md memo.md
+git add *  
+git commit -m "Add memo"  
 git push
 ```
 

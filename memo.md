@@ -3702,48 +3702,48 @@ git push -u origin master
 cd C:\Users\shino\doc\devops-example-client  
 npm install && npm start  
 ```  
-
-## クライアントアプリの整理
-
+  
+## クライアントアプリの整理  
+  
 移設先のアプリケーション起動テスト  
 ```  
 cd C:\Users\shino\doc\devops-example-client  
 npm install && npm start  
 ```  
-
-cicd 配下のクライアントアプリを削除、動機
-```
+  
+cicd 配下のクライアントアプリを削除、動機  
+```  
 cd C:\Users\shino\doc\cicddemo  
 rmdir /q /s devops-example-client  
 git commit -a -m "Delete devops"  
 git push  
-```
-
-クライアントアプリのお手本と管理レポジトリを比較して不要ファイルを整理
-```
-node_modules
-```
-ないね、node_modules ディレクトリだけ追記すればよい
-
-非管理ファイルを .gitignore に登録
-```
-node_modules
-```
-もう、追加されてた
-
-不要ファイル一度削除してレポジトリと同期
+```  
+  
+クライアントアプリのお手本と管理レポジトリを比較して不要ファイルを整理  
+```  
+node_modules  
+```  
+ないね、node_modules ディレクトリだけ追記すればよい  
+  
+非管理ファイルを .gitignore に登録  
+```  
+node_modules  
+```  
+もう、追加されてた  
+  
+不要ファイル一度削除してレポジトリと同期  
 ```  
 cd C:\Users\shino\doc\devops-example-client  
 git commit -a -m "Delete files"  
-git push
+git push  
 ```  
-
+  
 アプリケーション起動テスト  
 ```  
 cd C:\Users\shino\doc\devops-example-client  
 npm install && npm start  
 ```  
-
+  
 ## リードミーの編集  
   
 目的  
@@ -3753,16 +3753,16 @@ npm install && npm start
   
 ## メモ作成  
   
-既存のREAD.md の名前の変更
-```
+既存のREAD.md の名前の変更  
+```  
 cd C:\Users\shino\doc\cicddemo  
-copy READ.md memo.md
+copy READ.md memo.md  
 git commit -a -m "Add memo"  
-git push
-```
-
-今後は memo.md を開いて編集してゆく
-
+git push  
+```  
+  
+今後は memo.md を開いて編集してゆく  
+  
 ## リードミー作成  
   
 ## イシュー作成  

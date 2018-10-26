@@ -3654,8 +3654,6 @@ terraform destroy terraform
   
 ## クライアントアプリーションのレポジトリを作り手順には反映する  
   
-ここから再開、実際にオペレーションする  
-  
 目的  
 コード管理をなるべく簡単にする  
 Git で分割したほうが再利用しやすい  
@@ -3701,10 +3699,49 @@ git push -u origin master
   
 アプリケーション起動テスト  
 ```  
-cd C:\Users\shino\doc\cicddemo\devops-example-client  
+cd C:\Users\shino\doc\devops-example-client  
 npm install && npm start  
 ```  
-  
+
+## クライアントアプリの整理
+
+移設先のアプリケーション起動テスト  
+```  
+cd C:\Users\shino\doc\devops-example-client  
+npm install && npm start  
+```  
+
+cicd 配下のクライアントアプリを削除、動機
+```
+cd C:\Users\shino\doc\cicddemo  
+rmdir /q /s devops-example-client  
+git commit -a -m "Delete devops"  
+git push  
+```
+
+お手本と管理サイトを比較して不要ファイルを整理
+```
+```
+
+不良ファイルを .gitignore に登録
+```
+```
+
+不要ファイル一度削除してレポジトリと同期
+```  
+cd C:\Users\shino\doc\devops-example-client  
+delete 不要ファイル
+git add *  
+git commit -m "Delete files"  
+git push
+```  
+
+アプリケーション起動テスト  
+```  
+cd C:\Users\shino\doc\devops-example-client  
+npm install && npm start  
+```  
+
 ## リードミーの編集  
   
 ここから再開  

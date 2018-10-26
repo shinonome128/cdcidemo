@@ -18,6 +18,9 @@ https://github.com/shinonome128/devops-example-server
 travis ci サーバアプリのディプロイのステータス確認  
 https://travis-ci.org/shinonome128/devops-example-server  
   
+クライアントアプリ、コード管理、新規管理場所  
+https://github.com/shinonome128/devops-example-client  
+  
 山本和道さんの道場、ハンズオン形式でわかりやすい、全11回  
 https://knowledge.sakura.ad.jp/author/kazumichi_yamamoto/  
   
@@ -93,9 +96,6 @@ https://qiita.com/rog-works/items/74402f09b5aecc73f823
   
 Terraform でGCPインスタンスにSSH鍵認証する方法  
 https://stackoverflow.com/questions/38645002/how-to-add-an-ssh-key-to-an-gcp-instance-using-terraform  
-  
-クライアントアプリ、コード管理、新規管理場所  
-https://github.com/shinonome128/devops-example-client  
   
 ## やること  
   

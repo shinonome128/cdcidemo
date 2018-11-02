@@ -367,13 +367,4 @@ terraform plan -destroy terraform
 terraform destroy terraform  
 ```  
   
-## イシュー作成  
-  
-firewall rule で Travis CI のグローバルアドレスで絞りたい  
-Terraform のスタートスクリプトでサーバアプリをインストするとルートユーザになってしまう、shinonome128ユーザにしたい  
-travis login 時の GitHub クレデンシャルの入力を求められるので自動化したい  
-エフェメラル IP を .travis.yml に落とす時に GCP コンソールからアドレスを拾う作業を自動化したい  
-.travis.yml を GibHub にプッシュする時に GitHub のクレデンシャルを求められるで自動化したい  
-.travis.yml を使えば、環境変数、ファイルを暗号化した状態で使えそう  
-  
 以上  

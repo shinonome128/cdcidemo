@@ -229,8 +229,8 @@ terraform apply terraform
 ## Terraform によるデストロイ  
   
 作成環境の削除前チェックと削除  
-cd C:\Users\shino\doc\cicddemo  
 ```  
+cd C:\Users\shino\doc\cicddemo  
 terraform plan -destroy terraform  
 terraform destroy terraform  
 ```  
